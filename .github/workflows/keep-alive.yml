@@ -1,0 +1,24 @@
+name: Keep Render backend awake
+
+# Hits /api/health every 14 minutes so Render's free tier
+# never goes idle (15-min sleep threshold).
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: |
+          if [ -z "${{ secrets.BACKEND_URL }}" ]; then
+            echo "::error::BACKEND_URL secret is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Pinging ${{ secrets.BACKEND_URL }}/api/health"
+          curl --fail --silent --show-error --max-time 60 "${{ secrets.BACKEND_URL }}/api/health" || {
+            echo "Ping failed (this is fine if Render is just spinning up)"
+            exit 0
+          }

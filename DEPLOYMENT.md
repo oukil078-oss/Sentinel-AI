@@ -1,175 +1,232 @@
-# Deploying Sentinel AI to Vercel + Railway
+# Deploying Sentinel AI for Free
 
-This guide walks you through deploying the **frontend on Vercel** and the **FastAPI backend on Railway**, with **MongoDB on MongoDB Atlas (free tier)**.
-
-> **Estimated time:** ~25 minutes total.
-
----
-
-## Step 0 — Push the latest code to GitHub
-
-I just added these new files to your repo. Push them first:
-
-```bash
-git add vercel.json Procfile nixpacks.toml railway.json runtime.txt backend/.gitignore DEPLOYMENT.md
-git commit -m "Add Vercel + Railway deployment configs"
-git push origin main
-```
+> **Stack:** Vercel (frontend) + Render (backend) + MongoDB Atlas (database) + GitHub Actions (keep-alive)
+> **Total cost:** $0/month
+> **Total time:** ~25 minutes
 
 ---
 
-## Step 1 — MongoDB on MongoDB Atlas (free)
+## Step 0 — Push the new files to GitHub
 
-Railway no longer offers free MongoDB, so we use Atlas's M0 tier (512 MB, free forever).
+I just added these to your repo. Push them first using the **"Save to GitHub"** button in your Emergent chat:
 
-1. Go to <https://www.mongodb.com/cloud/atlas/register> and create a free account.
-2. Create a new project → "Sentinel AI".
-3. Click **Build a Database** → **M0 FREE** → choose any region close to you.
-4. **Database Access** (left sidebar) → **Add New Database User**:
+| File | Purpose |
+|---|---|
+| `vercel.json` | Tells Vercel where the frontend lives |
+| `render.yaml` | Render Blueprint — one-click backend deploy |
+| `.github/workflows/keep-alive.yml` | Pings backend every 14 min so it never sleeps |
+| `backend/.gitignore` | Keeps `models_cache/` out of git |
+| `DEPLOYMENT.md` | This guide |
+
+---
+
+## Step 1 — MongoDB Atlas (free database)
+
+Render no longer offers free MongoDB, but Atlas's M0 tier is free forever (512 MB).
+
+1. Go to <https://www.mongodb.com/cloud/atlas/register> → sign up.
+2. **Build a Database** → **M0 FREE** → pick any region close to you (e.g. AWS Oregon).
+3. **Database Access** (left sidebar) → **Add New Database User**:
+   - Authentication: **Password**
    - Username: `sentinel`
-   - Password: generate a strong one — *save this somewhere*.
-5. **Network Access** → **Add IP Address** → **Allow access from anywhere** (`0.0.0.0/0`). Required for Railway.
-6. Back to **Database** → click **Connect** on your cluster → **Drivers** → **Python** → copy the connection string. It looks like:
+   - Password: click **Autogenerate Secure Password** → **Copy** → save it somewhere
+   - Built-in Role: **Read and write to any database**
+   - **Add User**
+4. **Network Access** → **Add IP Address** → **Allow access from anywhere** (`0.0.0.0/0`) → **Confirm**.
+5. **Database** → click **Connect** on your cluster → **Drivers** → **Python 3.6 or later** → copy the connection string. Looks like:
    ```
-   mongodb+srv://sentinel:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   mongodb+srv://sentinel:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
    ```
-   Replace `<password>` with the password from step 4.
+   Replace `<password>` with the password from step 3. **Save the full string** — you'll paste it on Render.
 
 ---
 
-## Step 2 — Backend on Railway
+## Step 2 — Render (free backend)
 
-1. Go to <https://railway.app> and sign in with GitHub.
-2. **New Project** → **Deploy from GitHub repo** → pick `oukil078-oss/Sentinel-AI`.
-3. Railway will detect `nixpacks.toml` and start building. **Wait — first add the env vars.**
-4. Click your service → **Variables** tab → add these (one at a time):
+### Method A: One-click via Blueprint (recommended)
+
+1. Go to <https://render.com> → sign in with GitHub.
+2. Click **New** → **Blueprint**.
+3. Connect your `oukil078-oss/Sentinel-AI` repo. Render auto-detects `render.yaml`.
+4. You'll see one service: **sentinel-ai-backend**. Click **Apply**.
+5. On the next screen Render asks you to fill in the **secret env vars** (the ones marked `sync: false` in `render.yaml`):
 
    | Key | Value |
    |---|---|
-   | `MONGO_URL` | the Atlas connection string from Step 1 |
-   | `DB_NAME` | `sentinel_fraud` |
-   | `JWT_SECRET` | a long random hex string (run `python3 -c "import secrets; print(secrets.token_hex(32))"`) |
-   | `ADMIN_EMAIL` | `analyst@sentinel.ai` |
-   | `ADMIN_PASSWORD` | `Sentinel2026!` (or change to whatever you prefer) |
-   | `FRONTEND_URL` | leave blank for now — we fill it in Step 4 |
-   | `PORT` | Railway sets this automatically — **don't add it yourself** |
+   | `MONGO_URL` | the full Atlas connection string from Step 1.5 |
+   | `ADMIN_PASSWORD` | `Sentinel2026!` (or anything you want — write it down) |
+   | `FRONTEND_URL` | leave **blank** for now → we'll fill it in Step 4 |
 
-5. **Settings** → **Networking** → click **Generate Domain**. You get a URL like:
-   ```
-   https://sentinel-ai-production-abc1.up.railway.app
-   ```
-   **Copy it.** This is your `RAILWAY_BACKEND_URL`.
+   `JWT_SECRET` is auto-generated. `DB_NAME`, `ADMIN_EMAIL`, `PYTHON_VERSION` are pre-filled.
 
-6. Wait until the build finishes (~3–5 min — the first build trains the ML models). Test it:
+6. Click **Apply** again. Render starts building.
+7. **Wait ~5 minutes.** First build is slow because:
+   - Installing scikit-learn, imbalanced-learn, pandas, numpy (~2-3 min)
+   - Training 5 ML models with SMOTE on first startup (~30 sec)
+   - Seeding 800 transactions, 6 rules, 18 cases (~5 sec)
+
+8. Watch the **Logs** tab. You'll know it's ready when you see:
+   ```
+   ✓ Seeded admin user: analyst@sentinel.ai
+   ✓ Models trained and saved
+   🚀 Sentinel AI backend ready
+   ```
+
+9. At the top of your Render service page, click the URL — should look like:
+   ```
+   https://sentinel-ai-backend-xxxx.onrender.com
+   ```
+   **Copy it.** Test it:
    ```bash
-   curl https://YOUR_RAILWAY_URL/api/health
+   curl https://sentinel-ai-backend-xxxx.onrender.com/api/health
    # → {"status":"ok","service":"sentinel-ai","models_loaded":true,...}
    ```
 
+### Method B: Manual (if Blueprint fails)
+
+1. **New** → **Web Service** → connect your repo.
+2. Settings:
+   - **Name**: `sentinel-ai-backend`
+   - **Region**: Oregon (or closest)
+   - **Branch**: `main`
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn server:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: **Free**
+3. Add env vars under **Environment**:
+   ```
+   PYTHON_VERSION=3.11.9
+   MONGO_URL=<from Atlas>
+   DB_NAME=sentinel_fraud
+   JWT_SECRET=<generate: python3 -c "import secrets; print(secrets.token_hex(32))">
+   ADMIN_EMAIL=analyst@sentinel.ai
+   ADMIN_PASSWORD=Sentinel2026!
+   ```
+4. **Advanced** → **Health Check Path**: `/api/health`
+5. **Create Web Service**.
+
 ---
 
-## Step 3 — Frontend on Vercel
+## Step 3 — Vercel (free frontend)
 
 1. Go to <https://vercel.com> → sign in with GitHub.
 2. **Add New** → **Project** → import `oukil078-oss/Sentinel-AI`.
-3. **IMPORTANT — Configure these three things before clicking Deploy:**
+3. **CRITICAL — configure these before clicking Deploy:**
 
    | Setting | Value |
    |---|---|
-   | **Framework Preset** | Other (or Vite if shown) |
-   | **Root Directory** | `frontend`  ← click "Edit", then select `frontend` |
-   | **Build Command** | `yarn build` (default) |
-   | **Output Directory** | `dist` (default) |
-   | **Install Command** | `yarn install` (default) |
+   | **Framework Preset** | Other (Vercel will auto-detect Vite once Root Directory is set) |
+   | **Root Directory** | click **Edit** → select `frontend` |
 
 4. Expand **Environment Variables** and add:
 
    | Key | Value |
    |---|---|
-   | `REACT_APP_BACKEND_URL` | the Railway URL from Step 2.5 (e.g. `https://sentinel-ai-production-abc1.up.railway.app`) |
+   | `REACT_APP_BACKEND_URL` | the Render URL from Step 2.9 (e.g. `https://sentinel-ai-backend-xxxx.onrender.com`) |
 
-5. Click **Deploy**. Wait ~2 min.
+   Make sure all 3 environments (Production, Preview, Development) are checked.
 
-6. Vercel gives you a URL like `https://sentinel-ai.vercel.app`. **Copy it.**
-
-> If Vercel still uses the root `vercel.json` (because you forgot to set Root Directory = `frontend`), the build will still work because `vercel.json` instructs it to `cd frontend && yarn build`. But setting Root Directory is cleaner.
+5. Click **Deploy**. ~2 min.
+6. Copy your Vercel URL (e.g. `https://sentinel-ai.vercel.app`).
 
 ---
 
 ## Step 4 — Tell the backend about the frontend (CORS)
 
-1. Back in Railway → your service → **Variables** → find `FRONTEND_URL` → set it to your Vercel URL:
+1. Render dashboard → **sentinel-ai-backend** → **Environment** tab.
+2. Edit `FRONTEND_URL` → set it to your Vercel URL:
    ```
    https://sentinel-ai.vercel.app
    ```
-   (Use *only* the production URL — Vercel preview URLs are auto-allowed by the regex.)
-2. Railway redeploys automatically (~30s).
+3. Render redeploys automatically (~1 min).
+
+> Vercel preview URLs (`*.vercel.app`) are already auto-allowed by the backend regex, so you don't need to whitelist every preview deploy.
 
 ---
 
-## Step 5 — Test it
+## Step 5 — Set up the keep-alive ping (free, no cold starts)
 
-1. Open `https://sentinel-ai.vercel.app` in a browser.
-2. Log in with:
+Render's free tier sleeps after **15 min** of inactivity → first request afterward takes ~30-60 sec. The included GitHub Action pings every 14 min to prevent that.
+
+1. GitHub repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
+2. Name: `BACKEND_URL`
+3. Value: `https://sentinel-ai-backend-xxxx.onrender.com` (no trailing slash)
+4. **Add secret**.
+5. Go to the **Actions** tab in your repo → enable workflows if prompted → click **Keep Render backend awake** → **Run workflow** to test.
+
+Now your backend will be pinged every 14 minutes, 24/7, for free. 🎉
+
+---
+
+## Step 6 — Test the full app
+
+1. Open `https://sentinel-ai.vercel.app`.
+2. Login:
    - Email: `analyst@sentinel.ai`
-   - Password: `Sentinel2026!` (or whatever you set in Railway)
-3. You should land on the Overview dashboard. ML models, transactions, cases, rules — everything should load.
+   - Password: `Sentinel2026!` (or whatever you set in Step 2.5)
+3. Click around — Overview, Transactions, Cases, Rules, Predict, **Present** mode (top-right lime button).
 
 ---
 
 ## Troubleshooting
 
-### Vercel: `vite: command not found`
-- You forgot to set **Root Directory** = `frontend` in Vercel project settings, AND `vercel.json` is missing from your repo. Push the new `vercel.json` I just created.
+### Render build fails on `sklearn` / `imbalanced-learn`
+- Render free tier has 512 MB RAM, just barely enough. If it OOM's, set `PYTHON_VERSION=3.11.9` (smaller wheels than 3.12) — already in `render.yaml`.
 
-### Vercel build succeeds but UI is blank / API calls fail
-- `REACT_APP_BACKEND_URL` env var is missing or wrong on Vercel. Settings → Environment Variables → make sure it's set for **Production**, **Preview**, and **Development**. Then **Redeploy** (env var changes don't take effect until a new build).
+### Render starts but `/api/health` returns 502
+- Check **Logs** tab. Most common: `MONGO_URL` typo or Atlas IP whitelist missing `0.0.0.0/0`.
 
-### Railway: build fails on `imbalanced-learn`
-- Means the build OOM'd (the M0 build is small). Upgrade Railway plan briefly OR remove `imbalanced-learn` from `requirements.txt` and use a fallback (the engine has fallback logic — actually no, SMOTE is required). Just upgrade Railway to Hobby ($5/mo, includes $5 credits = effectively free).
+### Login returns 401
+- The admin user wasn't seeded. Check Render logs for `Seeded admin user`. If absent, MongoDB connection failed during startup — fix `MONGO_URL` and click **Manual Deploy → Clear build cache & deploy**.
 
-### Railway: starts but `/api/health` 502s
-- Open the **Deploy Logs** tab on Railway. Probably a missing env var or a MongoDB connection issue. Check `MONGO_URL` is the full Atlas string with `<password>` replaced.
+### Browser console shows "CORS blocked"
+- `FRONTEND_URL` on Render doesn't match your Vercel domain exactly. Re-check the URL (no trailing slash, correct subdomain) and Render redeploys.
 
-### Browser: "CORS blocked"
-- `FRONTEND_URL` on Railway doesn't match your Vercel domain. Fix it and Railway redeploys.
+### Vercel build still says `vite: command not found`
+- You forgot **Root Directory = frontend** in the Vercel project settings. **Settings** → **General** → **Root Directory** → set to `frontend` → **Save** → **Redeploy**.
 
-### Login: 401 every time
-- Atlas isn't reachable, so the admin user wasn't seeded. Check Railway logs for `seeded admin user`.
+### After deploy, every API call is slow (~3-5 sec)
+- Render free tier is geographically distant from your user. The 750 free hours/mo are still plenty. For faster response, you could pay $7/mo for a Starter instance, but it's optional.
 
----
-
-## After deployment
-
-- **First request is slow (~5–10s)**: Railway free containers cold-start. Subsequent requests are instant.
-- **Models retrain every time the container restarts** (Railway redeploys clear `models_cache/`). Takes ~30s of startup. If you want true persistence, attach a Railway Volume to `/app/backend/models_cache`.
-- **Database persists** on Atlas — your seeded transactions, cases, rules survive Railway redeploys.
+### "Cold start" still happens occasionally
+- The keep-alive workflow only runs while your free GitHub Actions minutes last (2,000/mo on free GitHub — way more than enough). If it fails to run, manually trigger from the Actions tab. Or use a free pinger like <https://uptimerobot.com> (set 5-min HTTP monitor on `/api/health`).
 
 ---
 
-## Costs
-- **MongoDB Atlas M0**: Free forever
-- **Railway Hobby**: $5/mo (includes $5 of usage = effectively free for low traffic)
-- **Vercel Hobby**: Free
-- **Total**: $0–$5/mo
+## Costs recap
+
+| Service | Plan | Cost |
+|---|---|---|
+| Vercel | Hobby | $0 |
+| Render Web Service | Free (512 MB, 750 hr/mo) | $0 |
+| MongoDB Atlas | M0 (512 MB, shared) | $0 |
+| GitHub Actions (keep-alive) | 2000 min/mo free | $0 |
+| **Total** | | **$0/month** |
 
 ---
 
-## Quick reference: env vars
+## Quick env vars cheat sheet
 
-### Railway (backend)
+### Render → sentinel-ai-backend → Environment
 ```
+PYTHON_VERSION=3.11.9
 MONGO_URL=mongodb+srv://sentinel:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
 DB_NAME=sentinel_fraud
-JWT_SECRET=<64 hex chars>
+JWT_SECRET=<auto-generated by render.yaml>
 ADMIN_EMAIL=analyst@sentinel.ai
 ADMIN_PASSWORD=Sentinel2026!
 FRONTEND_URL=https://sentinel-ai.vercel.app
 ```
 
-### Vercel (frontend)
+### Vercel → Settings → Environment Variables
 ```
-REACT_APP_BACKEND_URL=https://sentinel-ai-production-abc1.up.railway.app
+REACT_APP_BACKEND_URL=https://sentinel-ai-backend-xxxx.onrender.com
 ```
 
-That's it — push to GitHub and both services auto-redeploy on every commit. 🚀
+### GitHub → Settings → Secrets → Actions
+```
+BACKEND_URL=https://sentinel-ai-backend-xxxx.onrender.com
+```
+
+That's the whole thing. Push to GitHub → Vercel + Render auto-deploy → demo your platform to your teacher. 🚀
