@@ -166,8 +166,12 @@ async def health():
 async def login(payload: LoginRequest, request: Request):
     email = payload.email.strip().lower()
 
-    # Brute force protection
-    ip = request.client.host if request.client else "unknown"
+    # Brute force protection — prefer X-Forwarded-For (K8s ingress rotates proxy IPs)
+    xff = request.headers.get("x-forwarded-for", "")
+    if xff:
+        ip = xff.split(",")[0].strip()
+    else:
+        ip = request.client.host if request.client else "unknown"
     identifier = f"{ip}:{email}"
     attempt = await db.login_attempts.find_one({"identifier": identifier})
     if attempt and attempt.get("count", 0) >= 5:
