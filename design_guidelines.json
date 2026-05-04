@@ -1,0 +1,111 @@
+{
+  "theme": "dark",
+  "archetype": "Archetype 2: The Performance Pro (Modified with Lime/Neon accents for Fintech)",
+  "colors": {
+    "background": "#0B0B0D",
+    "surface": "#151518",
+    "surface_light": "#FFFFFF",
+    "surface_glass": "rgba(255,255,255,0.05)",
+    "primary": "#C6F24E",
+    "primary_hover": "#D4F475",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#8A8A93",
+    "text_inverse": "#0B0B0D",
+    "border": "rgba(255,255,255,0.1)",
+    "success": "#C6F24E",
+    "warning": "#FFB800",
+    "danger": "#FF3B30",
+    "chart_grid": "rgba(255,255,255,0.05)"
+  },
+  "typography": {
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "Manrope",
+    "mono_font": "JetBrains Mono",
+    "scales": {
+      "h1": "text-5xl md:text-6xl lg:text-7xl font-light tracking-tighter text-white",
+      "h2": "text-3xl md:text-4xl font-medium tracking-tight text-white",
+      "h3": "text-xl md:text-2xl font-medium text-white",
+      "body": "text-base font-medium leading-relaxed text-[#8A8A93]",
+      "small": "text-sm font-medium text-[#8A8A93]",
+      "numbers_large": "text-4xl md:text-5xl lg:text-6xl font-light tracking-tight font-mono text-white",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-[#8A8A93]"
+    }
+  },
+  "spacing_and_layout": {
+    "base_padding": "p-6 md:p-8",
+    "card_radius": "rounded-[24px]",
+    "pill_radius": "rounded-full",
+    "grid_system": "Control Room Grid (dense, gap-6 md:gap-8)",
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+  },
+  "components": {
+    "navigation": {
+      "style": "Rounded pill-shaped top nav, frosted glass effect",
+      "classes": "fixed top-6 left-1/2 -translate-x-1/2 bg-[#151518]/80 backdrop-blur-xl border border-white/10 rounded-full px-2 py-2 flex items-center gap-2 z-50",
+      "item": "px-6 py-2.5 rounded-full text-sm font-medium transition-colors text-white hover:bg-white/10",
+      "active_state": "bg-[#C6F24E] text-[#0B0B0D] hover:bg-[#D4F475]"
+    },
+    "cards": {
+      "dark_panel": "bg-[#151518] rounded-[24px] p-8 border border-white/5 shadow-2xl",
+      "light_panel": "bg-white text-[#0B0B0D] rounded-[24px] p-8 shadow-2xl",
+      "glass_panel": "bg-white/5 backdrop-blur-xl rounded-[24px] p-8 border border-white/10"
+    },
+    "buttons": {
+      "primary": "bg-[#C6F24E] text-[#0B0B0D] rounded-full px-6 py-3 font-medium hover:bg-[#D4F475] transition-colors flex items-center justify-center gap-2",
+      "secondary": "bg-white/5 text-white rounded-full px-6 py-3 font-medium border border-white/10 hover:bg-white/10 transition-colors flex items-center justify-center gap-2",
+      "icon": "h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+    },
+    "chips": {
+      "container": "flex items-center gap-2 p-1.5 bg-[#151518] rounded-full border border-white/5 w-fit",
+      "active": "bg-[#C6F24E] text-[#0B0B0D] rounded-full px-4 py-1.5 text-sm font-medium",
+      "inactive": "bg-transparent text-[#8A8A93] rounded-full px-4 py-1.5 text-sm font-medium hover:text-white transition-colors"
+    },
+    "tables": {
+      "wrapper": "w-full overflow-x-auto rounded-[24px] bg-[#151518] border border-white/5",
+      "header": "border-b border-white/5 bg-[#151518]/50 text-left text-xs font-bold uppercase tracking-[0.2em] text-[#8A8A93] py-4 px-6",
+      "row": "border-b border-white/5 hover:bg-white/5 transition-colors group",
+      "cell": "py-4 px-6 text-sm text-white font-medium whitespace-nowrap"
+    },
+    "data_visualization": {
+      "charts": "Use Recharts with transparent backgrounds. Stroke/Fill colors should be #C6F24E for positive/primary, and white/20 for secondary. Hide grid lines entirely or make them ultra-faint (rgba(255,255,255,0.05)). Remove axis lines.",
+      "kpi_values": "Use JetBrains Mono, weight 300, huge sizes (text-5xl or text-6xl) for dollar amounts or critical metrics."
+    },
+    "status_indicators": {
+      "safe": "bg-green-500/10 text-green-400 border border-green-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+      "warning": "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+      "fraud": "bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+    }
+  },
+  "media": {
+    "image_urls": {
+      "avatars": [
+        "https://images.unsplash.com/photo-1680104072720-ae824ef15c0e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMGZhY2UlMjBoZWFkc2hvdHxlbnwwfHx8fDE3Nzc5MTkwMDF8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMGZhY2UlMjBoZWFkc2hvdHxlbnwwfHx8fDE3Nzc5MTkwMDF8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1672685667592-0392f458f46f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMGZhY2UlMjBoZWFkc2hvdHxlbnwwfHx8fDE3Nzc5MTkwMDF8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1680104073282-8462cdf70b6a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMGZhY2UlMjBoZWFkc2hvdHxlbnwwfHx8fDE3Nzc5MTkwMDF8MA&ixlib=rb-4.1.0&q=85"
+      ],
+      "hero_backgrounds": [
+        "https://images.unsplash.com/photo-1721378466905-0375f1e7b879?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRhdGElMjBzZWN1cml0eSUyMGRhcmt8ZW58MHx8fHwxNzc3OTE5MDAxfDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "empty_states": [
+        "https://images.unsplash.com/photo-1727174439417-8c2d2c73fd1d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwxfHxiYW5rJTIwY2FyZCUyMGJsYWNrfGVufDB8fHx8MTc3NzkxOTAxN3ww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1759661881353-5b9cc55e1cf4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhdGElMjBzZWN1cml0eSUyMGRhcmt8ZW58MHx8fHwxNzc3OTE5MDAxfDA&ixlib=rb-4.1.0&q=85"
+      ]
+    }
+  },
+  "motion": {
+    "hover": "transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl",
+    "page_transition": "Framer Motion: initial={opacity: 0, y: 10}, animate={opacity: 1, y: 0}, transition={duration: 0.4}",
+    "list_stagger": "Framer Motion: staggerChildren: 0.1"
+  },
+  "instructions_to_main_agent": [
+    "Load Fonts: Include `<link href=\"https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@100,200,300,400,500,700,800,900&display=swap\" rel=\"stylesheet\">` in index.html, alongside Google Fonts for 'Manrope' and 'JetBrains Mono'.",
+    "Tailwind Config: Map the colors accurately in tailwind.config.js (background: #0B0B0D, primary: #C6F24E, surface: #151518). Set font families correspondingly.",
+    "Data-TestID: ALWAYS include data-testid on all interactive elements (buttons, inputs, filters, table rows) as per testing requirements.",
+    "Layout Approach: Create a split panel layout as requested. One side should feature a dense dark list, and the other side should pop with a contrasting pure white (#FFFFFF) detail card for dramatic effect.",
+    "No Generic Cards: Do NOT use standard Shadcn card styles. Implement the 24px heavily rounded corners with 1px subtle white/5 borders and deep #151518 backgrounds explicitly to ensure the 'premium fintech' aesthetic.",
+    "KPI Values: Ensure that numerical data (dollars, percentages) uses the JetBrains Mono font at a very light weight (font-light or 300) to match the reference style.",
+    "Lucide Icons: Use lucide-react with thin stroke widths (e.g. strokeWidth={1.5}) to match the elegant typography.",
+    "Top Navigation: Implement the rounded pill top nav fixed at the top center of the screen, styled exactly as defined in the components.navigation spec."
+  ]
+}
