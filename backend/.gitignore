@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv/
+venv/
+env/
+
+# Trained models — regenerated on first startup
+models_cache/
+data/
+
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/

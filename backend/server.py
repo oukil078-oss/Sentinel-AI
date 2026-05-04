@@ -129,9 +129,19 @@ async def lifespan(app: FastAPI):
 # ---------------------------------------------------------------------------
 app = FastAPI(title="Sentinel AI — Fraud Detection API", lifespan=lifespan)
 
+# Allow comma-separated origins from FRONTEND_URL (e.g. "https://x.vercel.app,https://y.vercel.app")
+_frontend_env = os.environ.get("FRONTEND_URL", "*").strip()
+if _frontend_env == "*" or not _frontend_env:
+    _allowed_origins = ["*"]
+else:
+    _allowed_origins = [o.strip() for o in _frontend_env.split(",") if o.strip()]
+    # Always allow vercel preview URLs in addition to the explicit list
+    _allowed_origins.append("https://*.vercel.app")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app" if _frontend_env != "*" else None,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

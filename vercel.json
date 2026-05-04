@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd frontend && yarn install && yarn build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "echo skip",
+  "framework": null,
+  "rewrites": [
+    { "source": "/((?!assets/|.*\\..*).*)", "destination": "/index.html" }
+  ]
+}
