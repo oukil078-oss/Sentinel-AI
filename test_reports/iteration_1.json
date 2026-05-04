@@ -1,0 +1,48 @@
+{
+  "summary": "Comprehensive backend regression suite for Sentinel AI fraud detection API. 29 tests across health, auth, dashboard, transactions, predict, ML metrics, cases, rules, audit, and live feed. 25/29 passed (86%). Single backend defect found: /api/predict returns empty explanations array for non-random_forest models, violating spec.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/predict",
+        "issue": "explanations field is empty list ([]) for models knn, logistic_regression, decision_tree, svm. Spec requires top-5 feature explanations with importances for ALL models. Code in ml_engine.py:333 gates the explanations block on `if model == 'random_forest':` only. decision_tree and logistic_regression have native importance attrs (feature_importances_ / coef_) that should be used; knn/svm should fall back to the RF global feature_importance ranking with the input values, or use permutation importance.",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix /api/predict to populate `explanations` for all 5 models (knn, logistic_regression, decision_tree, svm) — currently only random_forest returns explanations. Use feature_importances_ for tree models, abs(coef_) for logistic regression, and fall back to the global RF importance ranking (already cached in engine._feat_importance) for knn/svm so the UI can always show 'Top features driving this score'."
+  ],
+  "critical_code_review_comments": [
+    "auth.py: bcrypt hash format starts with $2b$ (verified) — OK.",
+    "server.py:177 — when a user has been locked out and lock has expired, the code deletes the attempt row but then immediately re-creates it on the next failure. Lockout logic is correct but `locked_until` is RESET on every failed attempt past 5 — this effectively extends the lockout indefinitely on continued attempts, not just 15 minutes from the 5th attempt. Consider only setting locked_until once when count crosses the threshold.",
+    "server.py CORS: `allow_origins=['*']` with `allow_credentials=False` is fine for token-based auth, but the test credentials doc and auth.py also support cookies (`access_token` cookie). If cookie auth is intended, CORS must use explicit origin and `allow_credentials=True`.",
+    "ml_engine.py: explanations only generated for random_forest — see action item above. This is the most user-visible defect.",
+    "models.py: PredictRequest has 28 explicit v1..v28 fields. Consider Field(0.0) defaults are present, but for robustness validate ranges (PCA values are unbounded but typically in [-30, 30]).",
+    "server.py:418 GET /api/cases/{case_id} — uses ObjectId(case_id) without try/except; an invalid id string raises bson.errors.InvalidId → 500 instead of 404/400.",
+    "server.py:540 DELETE /api/rules/{rule_id} — same ObjectId issue; would 500 on malformed id.",
+    "server.py login_attempts: rate-limit identifier is `ip:email`. Behind a proxy, request.client.host is the proxy IP — all users share the same identifier. Use X-Forwarded-For header if present.",
+    "server.py:130 — no global exception handler; unhandled errors return raw 500 with stacktrace in some cases."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (created)",
+    "/app/test_reports/iteration_1.json (created)",
+    "/app/test_reports/pytest/pytest_results.xml (created)"
+  ],
+  "success_rate": {"backend": "86% (25/29)", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "analyst@sentinel.ai / Sentinel2026! — works",
+  "seed_data_creation": "Created 1 TEST_CASE_<uuid> case (left in DB, status=in_review). Created 1 TEST_RULE_<uuid> rule which was then deleted as part of the test. No cleanup of the test case (small footprint, prefixed for easy identification).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend models are cached in /app/backend/models_cache so startup is fast on restart. Brute-force lockout uses ip:email identifier — the test_login_wrong_password test deliberately uses a non-existent email so the real admin is never locked out. If a future test triggers admin lockout, clear the collection: `mongo sentinel_fraud --eval 'db.login_attempts.deleteMany({})'`. Random Forest accuracy/roc_auc on the synthetic dataset is near-perfect (~0.999), per spec. After main agent fixes the explanations bug, just re-run `pytest /app/backend/tests/backend_test.py -v` — should be 29/29.",
+  "rca_of_the_issue": "Predict explanations bug RCA: ml_engine.py:333 has `if model == 'random_forest':` guard around the explanation generation. For models without `.feature_importances_` (knn, svm), this is a sensible guard, but it also incorrectly excludes decision_tree (has feature_importances_) and logistic_regression (has coef_). The empty list is then returned. Fix: replace the guard with model-specific logic — use feature_importances_ for tree models, abs(coef_[0]) for logistic_regression, and fall back to self._feat_importance (already cached from RF) combined with input values for knn/svm so the UI always has top-5 explanations."
+}
