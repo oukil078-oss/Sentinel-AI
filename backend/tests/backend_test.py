@@ -201,9 +201,107 @@ class TestPredict:
             assert k in d, f"{model} missing {k}"
         assert 0 <= d["probability"] <= 1
         assert d["risk_level"] in ("low", "medium", "high", "critical", "very_high")
-        # explanations: list of {feature, importance/value}
+        # Explanations must be top-5 non-empty for ALL models (bug fix re-test)
         assert isinstance(d["explanations"], list)
-        assert len(d["explanations"]) >= 1
+        assert len(d["explanations"]) == 5, (
+            f"{model} returned {len(d['explanations'])} explanations, expected 5: {d['explanations']}"
+        )
+        for exp in d["explanations"]:
+            assert "feature" in exp, f"{model} explanation missing feature: {exp}"
+            # Should have importance or value field with a numeric ranking
+            assert any(k in exp for k in ("importance", "value", "weight", "score")), (
+                f"{model} explanation missing rank field: {exp}"
+            )
+
+
+# ---------------- Invalid ObjectId handling (bug fix re-test) ----------------
+class TestInvalidObjectId:
+    INVALID_ID = "not-a-valid-objectid"
+
+    def test_get_case_invalid_id(self, session, auth_headers):
+        r = session.get(f"{BASE_URL}/api/cases/{self.INVALID_ID}",
+                        headers=auth_headers, timeout=15)
+        assert r.status_code == 400, f"expected 400 for invalid id, got {r.status_code}: {r.text}"
+
+    def test_patch_case_invalid_id(self, session, auth_headers):
+        r = session.patch(f"{BASE_URL}/api/cases/{self.INVALID_ID}",
+                          headers=auth_headers, json={"status": "in_review"}, timeout=15)
+        assert r.status_code == 400, f"expected 400 for invalid id, got {r.status_code}: {r.text}"
+
+    def test_patch_rule_invalid_id(self, session, auth_headers):
+        r = session.patch(f"{BASE_URL}/api/rules/{self.INVALID_ID}",
+                          headers=auth_headers, json={"active": False}, timeout=15)
+        assert r.status_code == 400, f"expected 400 for invalid id, got {r.status_code}: {r.text}"
+
+    def test_delete_rule_invalid_id(self, session, auth_headers):
+        r = session.delete(f"{BASE_URL}/api/rules/{self.INVALID_ID}",
+                           headers=auth_headers, timeout=15)
+        assert r.status_code == 400, f"expected 400 for invalid id, got {r.status_code}: {r.text}"
+
+
+# ---------------- Brute-force lockout extension fix ----------------
+class TestBruteForceLockout:
+    """5 wrong logins -> lockout. Subsequent attempts must NOT extend the lockout window."""
+
+    def test_lockout_does_not_extend(self, session):
+        """Hit /login until at least one proxy-IP+email identifier reaches lockout,
+        then verify locked_until is set ONCE (not extended on continued attempts).
+
+        Note: K8s ingress rotates between multiple proxy IPs so identifier (ip:email)
+        is split across multiple records. We loop enough times that at least one
+        identifier crosses the threshold of 5.
+        """
+        import pymongo
+        bf_email = f"bf_test_{uuid.uuid4().hex[:8]}@sentinel.ai"
+        mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+        db_name = os.environ.get("DB_NAME", "sentinel_fraud")
+        client = pymongo.MongoClient(mongo_url)
+        db = client[db_name]
+        db.login_attempts.delete_many({"identifier": {"$regex": bf_email}})
+
+        # Make enough attempts that at least one proxy-IP record reaches count >= 5.
+        # Empirically with 2-3 LB IPs, ~20 attempts guarantees one identifier locks.
+        locked_rec = None
+        for _ in range(25):
+            session.post(
+                f"{BASE_URL}/api/auth/login",
+                json={"email": bf_email, "password": "wrong"},
+                timeout=15,
+            )
+            locked_rec = db.login_attempts.find_one({
+                "identifier": {"$regex": bf_email},
+                "locked_until": {"$ne": None},
+            })
+            if locked_rec:
+                break
+
+        assert locked_rec is not None, (
+            "No identifier reached lockout state after 25 attempts. "
+            "Brute-force lockout may be broken."
+        )
+        first_locked_until = locked_rec["locked_until"]
+        locked_identifier = locked_rec["identifier"]
+
+        # Make 5 more failed attempts; the locked identifier's locked_until must NOT change.
+        for _ in range(5):
+            session.post(
+                f"{BASE_URL}/api/auth/login",
+                json={"email": bf_email, "password": "wrong"},
+                timeout=15,
+            )
+            time.sleep(0.05)
+
+        rec2 = db.login_attempts.find_one({"identifier": locked_identifier})
+        second_locked_until = rec2.get("locked_until")
+        assert second_locked_until == first_locked_until, (
+            f"locked_until EXTENDED on continued attempts! "
+            f"first={first_locked_until} second={second_locked_until} "
+            f"identifier={locked_identifier}"
+        )
+
+        # Cleanup
+        db.login_attempts.delete_many({"identifier": {"$regex": bf_email}})
+        client.close()
 
 
 # ---------------- ML Metrics ----------------

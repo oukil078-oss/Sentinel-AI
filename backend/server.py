@@ -178,12 +178,18 @@ async def login(payload: LoginRequest, request: Request):
 
     user = await db.users.find_one({"email": email})
     if not user or not verify_password(payload.password, user["password_hash"]):
-        await db.login_attempts.update_one(
+        from pymongo import ReturnDocument
+        new_attempt = await db.login_attempts.find_one_and_update(
             {"identifier": identifier},
-            {"$inc": {"count": 1},
-             "$set": {"locked_until": datetime.now(timezone.utc) + timedelta(minutes=15)}},
+            {"$inc": {"count": 1}},
             upsert=True,
+            return_document=ReturnDocument.AFTER,
         )
+        if new_attempt and new_attempt.get("count", 0) >= 5 and not new_attempt.get("locked_until"):
+            await db.login_attempts.update_one(
+                {"identifier": identifier},
+                {"$set": {"locked_until": datetime.now(timezone.utc) + timedelta(minutes=15)}},
+            )
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     await db.login_attempts.delete_one({"identifier": identifier})
@@ -417,7 +423,11 @@ async def list_cases(
 
 @app.get("/api/cases/{case_id}")
 async def get_case(case_id: str, user: dict = Depends(get_current_user)):
-    c = await db.cases.find_one({"_id": ObjectId(case_id)})
+    try:
+        oid = ObjectId(case_id)
+    except Exception:
+        raise HTTPException(400, "Invalid case id")
+    c = await db.cases.find_one({"_id": oid})
     if not c:
         raise HTTPException(404, "Case not found")
     c["id"] = str(c.pop("_id"))
@@ -459,6 +469,10 @@ async def create_case(payload: CaseCreate, user: dict = Depends(get_current_user
 
 @app.patch("/api/cases/{case_id}")
 async def update_case(case_id: str, payload: CaseUpdate, user: dict = Depends(get_current_user)):
+    try:
+        oid = ObjectId(case_id)
+    except Exception:
+        raise HTTPException(400, "Invalid case id")
     update_fields = {k: v for k, v in payload.model_dump(exclude_none=True).items() if k != "note"}
     update_fields["updated_at"] = datetime.now(timezone.utc)
     update_op: dict = {"$set": update_fields}
@@ -470,14 +484,14 @@ async def update_case(case_id: str, payload: CaseUpdate, user: dict = Depends(ge
                 "created_at": datetime.now(timezone.utc).isoformat(),
             }
         }
-    result = await db.cases.update_one({"_id": ObjectId(case_id)}, update_op)
+    result = await db.cases.update_one({"_id": oid}, update_op)
     if result.matched_count == 0:
         raise HTTPException(404, "Case not found")
     await db.audit_log.insert_one({
         "actor": user["email"], "action": "update_case", "target": case_id,
         "details": update_fields, "created_at": datetime.now(timezone.utc),
     })
-    c = await db.cases.find_one({"_id": ObjectId(case_id)})
+    c = await db.cases.find_one({"_id": oid})
     c["id"] = str(c.pop("_id"))
     for k in ("created_at", "updated_at"):
         if isinstance(c.get(k), datetime):
@@ -526,11 +540,15 @@ async def create_rule(payload: RuleCreate, user: dict = Depends(get_current_user
 
 @app.patch("/api/rules/{rule_id}")
 async def update_rule(rule_id: str, payload: RuleUpdate, user: dict = Depends(get_current_user)):
+    try:
+        oid = ObjectId(rule_id)
+    except Exception:
+        raise HTTPException(400, "Invalid rule id")
     update_fields = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
-    result = await db.rules.update_one({"_id": ObjectId(rule_id)}, {"$set": update_fields})
+    result = await db.rules.update_one({"_id": oid}, {"$set": update_fields})
     if result.matched_count == 0:
         raise HTTPException(404, "Rule not found")
-    r = await db.rules.find_one({"_id": ObjectId(rule_id)})
+    r = await db.rules.find_one({"_id": oid})
     r["id"] = str(r.pop("_id"))
     if isinstance(r.get("created_at"), datetime):
         r["created_at"] = r["created_at"].isoformat()
@@ -539,7 +557,11 @@ async def update_rule(rule_id: str, payload: RuleUpdate, user: dict = Depends(ge
 
 @app.delete("/api/rules/{rule_id}")
 async def delete_rule(rule_id: str, user: dict = Depends(get_current_user)):
-    result = await db.rules.delete_one({"_id": ObjectId(rule_id)})
+    try:
+        oid = ObjectId(rule_id)
+    except Exception:
+        raise HTTPException(400, "Invalid rule id")
+    result = await db.rules.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(404, "Rule not found")
     return {"deleted": True}

@@ -1,0 +1,43 @@
+{
+  "summary": "Re-test after iteration_1 fixes. All 34/34 backend tests PASS (100%). Verified: (1) /api/predict explanations now return 5 items for ALL models (random_forest, knn, logistic_regression, decision_tree, svm) — bug FIXED. (2) Invalid ObjectId on cases/rules routes now returns 400 not 500 — bug FIXED. (3) Brute-force lockout no longer extends locked_until on continued attempts (ReturnDocument.AFTER pattern verified via direct DB inspection) — bug FIXED. (4) All previously passing regression tests still pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "Brute-force identifier uses request.client.host which behind K8s ingress is the proxy IP. Observed two distinct proxy IPs (10.64.128.15 and 10.64.133.200) rotating across requests, splitting the failure counter across multiple identifier records. An attacker can effectively get N*5 attempts where N is the number of LB IPs before any single identifier locks. Fix: read X-Forwarded-For header and use the leftmost client IP, or use email-only identifier for the lockout key."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(LOW priority) Fix brute-force identifier to use X-Forwarded-For so K8s LB IP rotation does not bypass the 5-attempt lockout. The lockout-extension fix itself works correctly when the same identifier is hit, but the underlying identifier choice weakens the protection in production."
+  ],
+  "critical_code_review_comments": [
+    "ml_engine.py predict() — fixed: branches on model type; RF/DT use feature_importances_, LR uses abs(coef_[0]), KNN/SVM fall back to global RF importance ranking. All 5 models now return top-5 explanations.",
+    "server.py cases/rules routes — fixed: ObjectId(x) wrapped in try/except, returns 400 on InvalidId.",
+    "server.py login_attempts — fixed: ReturnDocument.AFTER pattern means locked_until is set only when count crosses 5 AND not already set (`not new_attempt.get('locked_until')` guard). Verified by DB inspection: locked_until immutable across 5 additional failed attempts.",
+    "server.py login_attempts — REMAINING: identifier is `ip:email` where ip is request.client.host (proxy IP). K8s ingress rotates proxy IPs (verified: 10.64.128.15, 10.64.133.200), so brute force protection is partially defeated in production behind a load balancer. Recommend X-Forwarded-For parsing.",
+    "server.py CORS still uses allow_origins=['*'] with allow_credentials=False — OK since auth is bearer-token based, not cookie based."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (added TestInvalidObjectId class with 4 tests, TestBruteForceLockout class with 1 test, hardened TestPredict to assert len(explanations)==5)",
+    "/app/test_reports/iteration_2.json (created)",
+    "/app/test_reports/pytest/pytest_results.xml (regenerated)"
+  ],
+  "success_rate": {"backend": "100% (34/34)", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "analyst@sentinel.ai / Sentinel2026! — works",
+  "seed_data_creation": "Created 1 TEST_CASE_<uuid> case (status flipped to in_review, left in DB ~small footprint, prefixed for cleanup). TEST_RULE_<uuid> created and deleted as part of test. Brute-force test creates and cleans up its own login_attempts records.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All previously reported bugs are fixed and verified with explicit assertions. Test count grew from 29 -> 34 (added 4 invalid-ObjectId tests, 1 brute-force-lockout-extension test). Brute force test seeds and cleans its own DB rows; uses MONGO_URL/DB_NAME from env. The remaining LOW priority finding is a pre-existing identifier choice issue (proxy IP rotation) — NOT a regression. To re-run: pytest /app/backend/tests/backend_test.py -v.",
+  "rca_of_the_issue": "All three iteration_1 bugs fixed and verified:\n1) Predict explanations: ml_engine.py now branches on model name. RF/DT use feature_importances_; LR uses abs(coef_[0]); KNN/SVM use cached _feat_importance from RF. All 5 models return exactly 5 explanations with feature+ranking field.\n2) Invalid ObjectId: server.py routes now wrap ObjectId(id_str) in try/except and raise HTTPException(400). Verified for GET /api/cases/{id}, PATCH /api/cases/{id}, PATCH /api/rules/{id}, DELETE /api/rules/{id}.\n3) Lockout extension: server.py login() uses find_one_and_update with ReturnDocument.AFTER and only sets locked_until when count>=5 AND not already set. Verified by DB inspection: locked_until value remained constant across 5 additional failed attempts.\n\nRemaining (NEW finding, LOW): Brute-force identifier uses raw client.host which is the kubernetes ingress proxy IP. Multiple proxy IPs in rotation -> protection partially defeated in prod. Action: parse X-Forwarded-For header."
+}

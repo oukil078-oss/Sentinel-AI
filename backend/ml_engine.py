@@ -328,11 +328,38 @@ class FraudEngine:
         else:
             risk = "low"
 
-        # Feature explanations (top 5 contributions)
+        # Feature explanations (top 5 contributions) — works for every model
         explanations = []
-        if model == "random_forest":
+        feat_names = self._feature_names
+        input_vals = vec[0]
+        if model == "random_forest" or model == "decision_tree":
             importances = m.feature_importances_
-            pairs = sorted(zip(self._feature_names, importances, vec[0]), key=lambda x: x[1], reverse=True)[:5]
+            pairs = sorted(zip(feat_names, importances, input_vals),
+                           key=lambda x: x[1], reverse=True)[:5]
+            for name, imp, val in pairs:
+                explanations.append({
+                    "feature": name,
+                    "value": round(float(val), 3),
+                    "importance": round(float(imp), 3),
+                })
+        elif model == "logistic_regression":
+            coefs = np.abs(m.coef_[0])
+            total = coefs.sum() or 1.0
+            pairs = sorted(zip(feat_names, coefs / total, input_vals),
+                           key=lambda x: x[1], reverse=True)[:5]
+            for name, imp, val in pairs:
+                explanations.append({
+                    "feature": name,
+                    "value": round(float(val), 3),
+                    "importance": round(float(imp), 3),
+                })
+        else:
+            # knn / svm fall back to the RF global ranking cached during training
+            rf_rank = {d["feature"]: d["importance"] for d in self._feat_importance}
+            pairs = sorted(
+                zip(feat_names, [rf_rank.get(n, 0.0) for n in feat_names], input_vals),
+                key=lambda x: x[1], reverse=True,
+            )[:5]
             for name, imp, val in pairs:
                 explanations.append({
                     "feature": name,
