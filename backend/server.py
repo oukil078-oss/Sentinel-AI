@@ -52,25 +52,31 @@ engine = FraudEngine(model_dir=str(Path(__file__).parent / "models_cache"))
 # Lifespan — seed admin, train models, seed demo data
 # ---------------------------------------------------------------------------
 async def seed_admin():
-    """Create or update admin user."""
+    """Create or update admin user (idempotent)."""
+    AVATAR = "/me.png"  # served by Vercel from frontend/public/me.png
+    NAME = "Yassine Oukil"
     existing = await db.users.find_one({"email": ADMIN_EMAIL})
     if existing is None:
         await db.users.insert_one({
             "email": ADMIN_EMAIL,
             "password_hash": hash_password(ADMIN_PASSWORD),
-            "name": "Sentinel Analyst",
+            "name": NAME,
             "role": "senior_analyst",
-            "avatar_url": "https://images.unsplash.com/photo-1680104072720-ae824ef15c0e?w=200&h=200&fit=crop",
+            "avatar_url": AVATAR,
             "created_at": datetime.now(timezone.utc),
         })
         logger.info(f"✓ Seeded admin user: {ADMIN_EMAIL}")
     else:
+        updates = {}
         if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-            await db.users.update_one(
-                {"email": ADMIN_EMAIL},
-                {"$set": {"password_hash": hash_password(ADMIN_PASSWORD)}}
-            )
-            logger.info(f"✓ Updated admin password for: {ADMIN_EMAIL}")
+            updates["password_hash"] = hash_password(ADMIN_PASSWORD)
+        if existing.get("avatar_url") != AVATAR:
+            updates["avatar_url"] = AVATAR
+        if existing.get("name") != NAME:
+            updates["name"] = NAME
+        if updates:
+            await db.users.update_one({"email": ADMIN_EMAIL}, {"$set": updates})
+            logger.info(f"✓ Updated admin profile fields: {list(updates.keys())}")
 
 
 async def ensure_indexes():

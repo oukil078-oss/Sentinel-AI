@@ -26,7 +26,7 @@ export function LoginPage() {
     setError("");
     try {
       await login(email, password);
-      toast("Welcome back, Analyst", "success");
+      toast("Welcome back, Yassine", "success");
       const from = (location.state as any)?.from?.pathname || "/";
       navigate(from, { replace: true });
     } catch (err: any) {
