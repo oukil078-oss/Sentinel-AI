@@ -54,7 +54,7 @@ engine = FraudEngine(model_dir=str(Path(__file__).parent / "models_cache"))
 async def seed_admin():
     """Create or update admin user (idempotent)."""
     AVATAR = "/me.png"  # served by Vercel from frontend/public/me.png
-    NAME = "Yassine Oukil"
+    NAME = "Zakarya Oukil"
     existing = await db.users.find_one({"email": ADMIN_EMAIL})
     if existing is None:
         await db.users.insert_one({

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Database, Cpu, Shield, ExternalLink, BookOpen, Code2, Sparkles } from "lucide-react";
+import { Database, Cpu, Shield, ExternalLink, BookOpen, Code2, Sparkles, Users } from "lucide-react";
 import { PageHeader, Panel, Button } from "../components/ui";
 
 export function AboutPage() {
@@ -48,6 +48,44 @@ export function AboutPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Project team */}
+      <Panel light className="!text-[#0B0B0D]">
+        <h3 className="font-display text-xl text-[#0B0B0D] font-medium mb-1 flex items-center gap-2">
+          <Users className="w-5 h-5 text-[#9FC63B]" strokeWidth={2} /> Project team
+        </h3>
+        <p className="text-sm text-[#5A5A63] mb-6">Built by two students for a credit-card fraud detection module.</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { name: "Zakarya Oukil", role: "ML pipeline · backend · UI/UX", avatar: "/me.png" },
+            { name: "Cherif Alilat", role: "Data analysis · model evaluation · presentation", avatar: null },
+          ].map((m, i) => (
+            <motion.div
+              key={m.name}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+              className="flex items-center gap-4 p-5 rounded-2xl bg-[#0B0B0D] text-white"
+              data-testid={`team-${m.name.replace(/\s/g, "-")}`}
+            >
+              {m.avatar ? (
+                <img src={m.avatar} alt={m.name} className="w-14 h-14 rounded-full object-cover border border-white/10" />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#C6F24E] to-[#9FC63B] flex items-center justify-center text-[#0B0B0D] text-xl font-bold border border-white/10">
+                  {m.name.split(" ").map((n) => n[0]).join("")}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold text-white truncate">{m.name}</p>
+                <p className="text-xs text-[#8A8A93]">{m.role}</p>
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.22em] text-[#C6F24E] font-bold shrink-0">
+                Co-author
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </Panel>
 
       {/* References */}
       <Panel>
