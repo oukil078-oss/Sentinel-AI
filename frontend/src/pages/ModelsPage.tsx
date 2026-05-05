@@ -79,9 +79,9 @@ export function ModelsPage() {
         }
       />
 
-      {/* Pipeline visual */}
-      <Panel>
-        <h3 className="font-display text-lg text-white mb-5">Training pipeline</h3>
+      {/* Pipeline visual — WHITE panel (split-feel like home) */}
+      <Panel light className="!text-[#0B0B0D]">
+        <h3 className="font-display text-lg text-[#0B0B0D] mb-5">Training pipeline</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
           {[
             { step: "01", label: "Ingest", desc: "30K rows" },
@@ -94,10 +94,10 @@ export function ModelsPage() {
               key={s.step}
               initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * i }}
-              className="p-4 rounded-2xl bg-white/[0.02] border border-white/5"
+              className="p-4 rounded-2xl bg-black/[0.03] border border-black/5"
             >
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#C6F24E] font-bold mb-2">{s.step}</p>
-              <p className="text-sm text-white font-semibold">{s.label}</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#9FC63B] font-bold mb-2">{s.step}</p>
+              <p className="text-sm text-[#0B0B0D] font-semibold">{s.label}</p>
               <p className="text-xs text-[#8A8A93]">{s.desc}</p>
             </motion.div>
           ))}

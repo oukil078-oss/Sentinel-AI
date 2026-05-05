@@ -180,8 +180,8 @@ export function Layout() {
               <Menu className="w-4 h-4" strokeWidth={2} />
             </button>
 
-            {/* Pill top nav (inspired by reference) */}
-            <div className="hidden md:flex items-center gap-1 p-1.5 bg-[#151518]/80 backdrop-blur-xl rounded-full border border-white/5 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+            {/* Pill top nav (inspired by reference) — WHITE bg */}
+            <div className="hidden md:flex items-center gap-1 p-1.5 bg-white rounded-full border border-black/5 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
               {PRIMARY_NAV.map((item) => (
                 <NavLink
                   key={item.to}
@@ -190,8 +190,8 @@ export function Layout() {
                   data-testid={item.testid}
                   className={({ isActive }) =>
                     cn(
-                      "relative flex items-center gap-2 px-5 py-2 rounded-full text-sm font-medium transition-colors",
-                      isActive ? "text-[#0B0B0D]" : "text-[#8A8A93] hover:text-white"
+                      "relative flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-colors",
+                      isActive ? "text-[#0B0B0D]" : "text-[#5A5A63] hover:text-[#0B0B0D]"
                     )
                   }
                 >

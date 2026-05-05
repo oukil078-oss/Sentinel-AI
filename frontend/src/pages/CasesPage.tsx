@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, MessageSquare, ArrowUpRight, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { api, formatApiError } from "../lib/api";
 import { PageHeader, Panel, Button, StatusPill, Chip } from "../components/ui";
-import { formatCurrency, timeAgo } from "../lib/utils";
+import { formatCurrency, timeAgo, cn } from "../lib/utils";
 import { useToast } from "../components/Toast";
 
 const STATUSES = ["new", "in_review", "escalated", "resolved", "false_positive"] as const;
@@ -115,33 +115,34 @@ export function CasesPage() {
           )}
         </div>
 
-        {/* Detail */}
+        {/* Detail — WHITE for split-feel like home */}
         <div className="xl:col-span-3">
           {selected ? (
-            <Panel>
+            <Panel light className="!text-[#0B0B0D]">
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <StatusPill status={selected.status} />
                     <StatusPill status={selected.priority} />
                   </div>
-                  <h2 className="font-display text-2xl text-white font-medium mb-2 text-balance">{selected.title}</h2>
-                  <p className="text-xs font-mono text-[#8A8A93] tnum">{selected.case_id} · assigned to {selected.assignee}</p>
+                  <h2 className="font-display text-2xl text-[#0B0B0D] font-medium mb-2 text-balance">{selected.title}</h2>
+                  <p className="text-xs font-mono text-[#5A5A63] tnum">{selected.case_id} · assigned to {selected.assignee}</p>
                 </div>
               </div>
 
-              <p className="text-sm text-[#8A8A93] leading-relaxed mb-6 pb-6 border-b border-white/5">
+              <p className="text-sm text-[#5A5A63] leading-relaxed mb-6 pb-6 border-b border-black/5">
                 {selected.description}
               </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {/* nested DARK metric strip — like reference image */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-[#0B0B0D]">
                 {[
                   ["Amount", formatCurrency(selected.amount)],
                   ["Risk score", `${(selected.risk_score * 100).toFixed(1)}%`],
                   ["TX ID", selected.tx_id],
                   ["Created", timeAgo(selected.created_at)],
                 ].map(([k, v]) => (
-                  <div key={k as string} className="p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div key={k as string}>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">{k}</p>
                     <p className="text-sm font-mono text-white mt-1 tnum truncate">{v as any}</p>
                   </div>
@@ -150,34 +151,38 @@ export function CasesPage() {
 
               {/* Actions */}
               <div className="flex flex-wrap items-center gap-2 mb-6">
-                <p className="text-xs text-[#8A8A93] mr-2">Move to:</p>
+                <p className="text-xs text-[#5A5A63] mr-2">Move to:</p>
                 {STATUSES.map((s) => (
-                  <Button
+                  <button
                     key={s}
-                    variant={selected.status === s ? "primary" : "secondary"}
-                    size="sm"
                     onClick={() => updateStatus(selected.id, s)}
-                    testid={`case-action-${s}`}
+                    data-testid={`case-action-${s}`}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all",
+                      selected.status === s
+                        ? "bg-[#C6F24E] text-[#0B0B0D] shadow-[0_4px_20px_rgba(198,242,78,0.35)]"
+                        : "bg-black/5 text-[#5A5A63] hover:bg-[#0B0B0D] hover:text-white"
+                    )}
                   >
                     {s.replace("_", " ")}
-                  </Button>
+                  </button>
                 ))}
               </div>
 
               {/* Notes */}
-              <div className="border-t border-white/5 pt-6">
-                <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#C6F24E]" strokeWidth={2} />
+              <div className="border-t border-black/5 pt-6">
+                <h4 className="font-semibold text-[#0B0B0D] mb-4 flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#9FC63B]" strokeWidth={2} />
                   Analyst notes ({selected.notes?.length || 0})
                 </h4>
                 <div className="space-y-3 mb-4 max-h-[240px] overflow-y-auto">
                   {(selected.notes || []).map((n: any, i: number) => (
-                    <div key={i} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                    <div key={i} className="p-4 rounded-2xl bg-black/[0.03] border border-black/5">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs font-semibold text-white">{n.author}</span>
-                        <span className="text-[10px] text-[#5A5A63]">{timeAgo(n.created_at)}</span>
+                        <span className="text-xs font-semibold text-[#0B0B0D]">{n.author}</span>
+                        <span className="text-[10px] text-[#8A8A93]">{timeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-sm text-[#8A8A93] leading-relaxed">{n.text}</p>
+                      <p className="text-sm text-[#5A5A63] leading-relaxed">{n.text}</p>
                     </div>
                   ))}
                 </div>
@@ -188,7 +193,7 @@ export function CasesPage() {
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Add an investigation note..."
                     data-testid="case-note-input"
-                    className="flex-1 bg-white/5 border border-white/5 rounded-full px-5 py-2.5 text-sm text-white placeholder:text-[#5A5A63] focus:border-[#C6F24E]/40 focus:outline-none"
+                    className="flex-1 bg-black/[0.03] border border-black/10 rounded-full px-5 py-2.5 text-sm text-[#0B0B0D] placeholder:text-[#8A8A93] focus:border-[#9FC63B]/50 focus:outline-none"
                     onKeyDown={(e) => e.key === "Enter" && addNote()}
                   />
                   <Button variant="primary" onClick={addNote} testid="add-note-btn">

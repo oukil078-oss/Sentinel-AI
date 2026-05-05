@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Github, Database, Cpu, Shield, ExternalLink, BookOpen, Code2, Sparkles } from "lucide-react";
+import { Database, Cpu, Shield, ExternalLink, BookOpen, Code2, Sparkles } from "lucide-react";
 import { PageHeader, Panel, Button } from "../components/ui";
 
 export function AboutPage() {
@@ -57,9 +57,9 @@ export function AboutPage() {
         <div className="space-y-3">
           {[
             {
-              url: "https://github.com/shakiliitju/Credit-Card-Fraud-Detection-Using-Machine-Learning",
-              label: "Reference GitHub: Credit Card Fraud Detection — shakiliitju",
-              icon: Github,
+              url: "https://www.pinterest.com/pin/1096485840541234713/",
+              label: "UI / UX reference: dark fintech dashboard with lime accents (Pinterest)",
+              icon: Sparkles,
             },
             {
               url: "https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud",

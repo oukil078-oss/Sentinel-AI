@@ -209,23 +209,23 @@ export function TransactionsPage() {
           </div>
         </Panel>
 
-        {/* Detail panel */}
+        {/* Detail panel — WHITE for home-page split feel */}
         <div className="xl:col-span-1 space-y-5 xl:sticky xl:top-24 xl:self-start">
           {selected ? (
-            <Panel>
+            <Panel light className="!text-[#0B0B0D]">
               <div className="flex items-start justify-between mb-5">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1.5">Transaction detail</p>
-                  <h3 className="font-mono text-lg text-white tnum">{selected.tx_id}</h3>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#5A5A63] font-bold mb-1.5">Transaction detail</p>
+                  <h3 className="font-mono text-lg text-[#0B0B0D] tnum">{selected.tx_id}</h3>
                 </div>
                 <StatusPill status={selected.predicted_fraud ? "fraud" : "legitimate"} />
               </div>
 
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-black/5">
                 <img src={selected.avatar} alt="" className="w-12 h-12 rounded-full object-cover" />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white truncate">{selected.cardholder}</p>
-                  <p className="text-xs text-[#8A8A93] font-mono">{selected.card_brand} {selected.card_last4} · {selected.location}</p>
+                  <p className="font-semibold text-[#0B0B0D] truncate">{selected.cardholder}</p>
+                  <p className="text-xs text-[#5A5A63] font-mono">{selected.card_brand} {selected.card_last4} · {selected.location}</p>
                 </div>
               </div>
 
@@ -239,19 +239,20 @@ export function TransactionsPage() {
                   ["Risk level", selected.risk_level],
                 ].map(([k, v]) => (
                   <div key={k as string} className="flex items-center justify-between">
-                    <span className="text-xs text-[#8A8A93]">{k}</span>
-                    <span className="text-sm text-white font-medium font-mono tnum">{v as any}</span>
+                    <span className="text-xs text-[#5A5A63]">{k}</span>
+                    <span className="text-sm text-[#0B0B0D] font-medium font-mono tnum">{v as any}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 mb-4">
+              {/* Nested DARK card inside the white panel — matches reference image exactly */}
+              <div className="p-5 rounded-2xl bg-[#0B0B0D] mb-4">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold mb-2">Fraud score</p>
                 <div className="flex items-baseline gap-2">
                   <p className="font-mono text-3xl font-light text-white tnum">{(selected.fraud_score * 100).toFixed(1)}</p>
                   <span className="text-sm text-[#8A8A93]">%</span>
                 </div>
-                <div className="mt-2 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
