@@ -58,7 +58,6 @@ export function AboutPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { name: "", role: "", avatar: " https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQP6a0Axz2eWu-2MLRCRonTtFwCjPIOayZOFg&s" },
             { name: "Zakarya Oukil", role: "ML pipeline · backend · UI/UX", avatar: "/me.png" },
             { name: "Cherif Alilat", role: "Data analysis · model evaluation · presentation", avatar: null },
           ].map((m, i) => (
