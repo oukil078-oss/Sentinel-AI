@@ -2,8 +2,6 @@
 
 A production-quality analytics platform for detecting fraudulent credit card transactions using machine learning. Built as an interactive dashboard for university data science presentations.
 
-**Based on:** [Credit-Card-Fraud-Detection-Using-Machine-Learning](https://github.com/shakiliitju/Credit-Card-Fraud-Detection-Using-Machine-Learning) by [shakiliitju](https://github.com/shakiliitju)
-
 ---
 
 ## 📊 Dataset
