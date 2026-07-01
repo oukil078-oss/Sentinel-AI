@@ -35,7 +35,7 @@ export function AuditPage() {
       />
 
       <Panel padding="p-0">
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-[var(--th-border)]">
           {items.map((e, i) => {
             const Icon = ACTION_ICONS[e.action] || Activity;
             const color = ACTION_COLORS[e.action] || "#8A8A93";
@@ -44,7 +44,7 @@ export function AuditPage() {
                 key={e.id}
                 initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.015 }}
-                className="flex items-center gap-4 p-5 hover:bg-white/[0.02] transition-colors"
+                className="flex items-center gap-4 p-5 hover:bg-[var(--th-subtle)] transition-colors"
                 data-testid={`audit-${e.id}`}
               >
                 <div
@@ -55,22 +55,22 @@ export function AuditPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold text-white capitalize">{e.action.replace(/_/g, " ")}</span>
-                    {e.target && <span className="font-mono text-xs text-[#8A8A93] tnum">· {e.target}</span>}
+                    <span className="text-sm font-semibold text-[var(--th-text)] capitalize">{e.action.replace(/_/g, " ")}</span>
+                    {e.target && <span className="font-mono text-xs text-[var(--th-text-secondary)] tnum">· {e.target}</span>}
                   </div>
-                  <p className="text-xs text-[#8A8A93]">
-                    <span className="text-white font-medium">{e.actor}</span>
+                  <p className="text-xs text-[var(--th-text-secondary)]">
+                    <span className="text-[var(--th-text)] font-medium">{e.actor}</span>
                     {e.ip && <span> · from {e.ip}</span>}
                   </p>
                 </div>
-                <span className="text-xs text-[#5A5A63] whitespace-nowrap font-mono tnum">
+                <span className="text-xs text-[var(--th-text-dim)] whitespace-nowrap font-mono tnum">
                   {timeAgo(e.created_at)}
                 </span>
               </motion.div>
             );
           })}
           {items.length === 0 && (
-            <p className="text-center text-[#8A8A93] py-16 text-sm">No activity recorded yet</p>
+            <p className="text-center text-[var(--th-text-secondary)] py-16 text-sm">No activity recorded yet</p>
           )}
         </div>
       </Panel>

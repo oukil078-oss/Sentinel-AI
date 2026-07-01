@@ -104,7 +104,20 @@ class FraudEngine:
         real_path = Path(__file__).parent / "data" / "creditcard.csv"
         if real_path.exists():
             print(f"[ml] Loading real Kaggle dataset from {real_path}")
-            return pd.read_csv(real_path)
+            df = pd.read_csv(real_path)
+            if len(df) > 50000:
+                print(f"[ml] Downsampling real dataset from {len(df)} to 30,000 rows for memory safety and training speed")
+                # Keep all fraud cases (Class == 1)
+                fraud_df = df[df["Class"] == 1]
+                # Sample remaining rows from legitimate cases (Class == 0)
+                legit_df = df[df["Class"] == 0].sample(n=30000 - len(fraud_df), random_state=42)
+                # Combine and shuffle
+                df = pd.concat([fraud_df, legit_df]).sample(frac=1, random_state=42).reset_index(drop=True)
+            
+            # Reorder columns to match self._feature_names + ["Class"]
+            cols = self._feature_names + ["Class"]
+            df = df[cols]
+            return df
 
         print("[ml] Generating realistic synthetic dataset matching Kaggle creditcardfraud schema")
         # Mirror the Kaggle creditcardfraud statistics

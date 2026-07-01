@@ -16,11 +16,11 @@ export function AboutPage() {
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#C6F24E]/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="relative max-w-3xl">
           <p className="text-[11px] uppercase tracking-[0.25em] text-[#C6F24E] font-bold mb-4">The problem</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-white font-light leading-[1.15] tracking-tight mb-5 text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl text-[var(--th-text)] font-light leading-[1.15] tracking-tight mb-5 text-balance">
             Credit card fraud loses the industry <span className="text-[#C6F24E]">$32 billion</span> every year.
             Only 0.17% of transactions are fraudulent — and missing one costs real people.
           </h2>
-          <p className="text-base text-[#8A8A93] leading-relaxed">
+          <p className="text-base text-[var(--th-text-secondary)] leading-relaxed">
             Sentinel AI pairs a production-grade Random Forest with SMOTE class balancing, five baseline
             models, explainable rules, and a full analyst workflow — so every transaction gets scored,
             every alert gets triaged, and nothing falls through the cracks.
@@ -42,8 +42,8 @@ export function AboutPage() {
                    style={{ background: `${s.color}18`, color: s.color }}>
                 <s.icon className="w-5 h-5" strokeWidth={2} />
               </div>
-              <p className="text-sm font-semibold text-white mb-1">{s.title}</p>
-              <p className="text-xs text-[#8A8A93] leading-relaxed">{s.desc}</p>
+              <p className="text-sm font-semibold text-[var(--th-text)] mb-1">{s.title}</p>
+              <p className="text-xs text-[var(--th-text-secondary)] leading-relaxed">{s.desc}</p>
             </Panel>
           </motion.div>
         ))}
@@ -53,10 +53,10 @@ export function AboutPage() {
       <Panel light className="!text-[#0B0B0D]">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h3 className="font-display text-xl text-[#0B0B0D] font-medium mb-1 flex items-center gap-2">
+            <h3 className="font-display text-xl text-[var(--th-invert-text)] font-medium mb-1 flex items-center gap-2">
               <Users className="w-5 h-5 text-[#9FC63B]" strokeWidth={2} /> Project team
             </h3>
-            <p className="text-sm text-[#5A5A63]">Built by two students for The Machine Learning module.</p>
+            <p className="text-sm text-[var(--th-text-dim)]">Built by three students for The Machine Learning module.</p>
           </div>
           <img 
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQP6a0Axz2eWu-2MLRCRonTtFwCjPIOayZOFg&s" 
@@ -69,24 +69,25 @@ export function AboutPage() {
           {[
             { name: "Zakarya Oukil", role: "ML pipeline · backend · UI/UX", avatar: "/me.png" },
             { name: "Cherif Alilat", role: "Data analysis · model evaluation · presentation", avatar: null },
+            { name: "Mohamed Hamdi", role: "Data analysis · model evaluation · presentation", avatar: null },
           ].map((m, i) => (
             <motion.div
               key={m.name}
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="flex items-center gap-4 p-5 rounded-2xl bg-[#0B0B0D] text-white"
+              className="flex items-center gap-4 p-5 rounded-2xl bg-[var(--th-bg)] text-[var(--th-text)]"
               data-testid={`team-${m.name.replace(/\s/g, "-")}`}
             >
               {m.avatar ? (
-                <img src={m.avatar} alt={m.name} className="w-14 h-14 rounded-full object-cover border border-white/10" />
+                <img src={m.avatar} alt={m.name} className="w-14 h-14 rounded-full object-cover border border-[var(--th-border-strong)]" />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#C6F24E] to-[#9FC63B] flex items-center justify-center text-[#0B0B0D] text-xl font-bold border border-white/10">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#C6F24E] to-[#9FC63B] flex items-center justify-center text-[#0B0B0D] text-xl font-bold border border-[var(--th-border-strong)]">
                   {m.name.split(" ").map((n) => n[0]).join("")}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-base font-semibold text-white truncate">{m.name}</p>
-                <p className="text-xs text-[#8A8A93]">{m.role}</p>
+                <p className="text-base font-semibold text-[var(--th-text)] truncate">{m.name}</p>
+                <p className="text-xs text-[var(--th-text-secondary)]">{m.role}</p>
               </div>
               <span className="text-[10px] uppercase tracking-[0.22em] text-[#C6F24E] font-bold shrink-0">
                 Co-author
@@ -98,7 +99,7 @@ export function AboutPage() {
 
       {/* References */}
       <Panel>
-        <h3 className="font-display text-xl text-white font-medium mb-5 flex items-center gap-2">
+        <h3 className="font-display text-xl text-[var(--th-text)] font-medium mb-5 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-[#C6F24E]" strokeWidth={2} /> References
         </h3>
         <div className="space-y-3">
@@ -129,14 +130,14 @@ export function AboutPage() {
               href={r.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all group"
+              className="flex items-center gap-3 p-4 rounded-2xl bg-[var(--th-subtle)] border border-[var(--th-border)] hover:bg-[var(--th-subtle-hover)] hover:border-[var(--th-border-strong)] transition-all group"
               data-testid={`ref-link-${r.url}`}
             >
               <div className="w-9 h-9 rounded-xl bg-[#C6F24E]/10 flex items-center justify-center text-[#C6F24E]">
                 <r.icon className="w-4 h-4" strokeWidth={2} />
               </div>
-              <p className="flex-1 text-sm text-white group-hover:text-[#C6F24E] transition-colors">{r.label}</p>
-              <ExternalLink className="w-4 h-4 text-[#5A5A63] group-hover:text-white transition-colors" strokeWidth={2} />
+              <p className="flex-1 text-sm text-[var(--th-text)] group-hover:text-[#C6F24E] transition-colors">{r.label}</p>
+              <ExternalLink className="w-4 h-4 text-[var(--th-text-dim)] group-hover:text-[var(--th-text)] transition-colors" strokeWidth={2} />
             </a>
           ))}
         </div>
@@ -144,11 +145,11 @@ export function AboutPage() {
 
       {/* How it works */}
       <Panel>
-        <h3 className="font-display text-xl text-white font-medium mb-5">Presentation script</h3>
-        <blockquote className="border-l-2 border-[#C6F24E] pl-6 text-[#8A8A93] leading-relaxed space-y-3 text-sm">
-          <p>"Credit card fraud represents billions in annual losses. Our dataset contains 284,808 European credit card transactions — but only 492 are fraudulent. That's <span className="text-white font-semibold">0.17%</span>."</p>
-          <p>"We applied <span className="text-white font-semibold">StandardScaler</span> to normalize features because distance-based models (KNN, SVM) can't handle raw amount magnitudes. Then <span className="text-white font-semibold">SMOTE</span> balanced the training set without touching test data."</p>
-          <p>"We trained five scikit-learn models side-by-side: <span className="text-white font-semibold">Random Forest</span> won on ROC-AUC and PR-AUC — two metrics that matter more than accuracy for imbalanced data."</p>
+        <h3 className="font-display text-xl text-[var(--th-text)] font-medium mb-5">Presentation script</h3>
+        <blockquote className="border-l-2 border-[#C6F24E] pl-6 text-[var(--th-text-secondary)] leading-relaxed space-y-3 text-sm">
+          <p>"Credit card fraud represents billions in annual losses. Our dataset contains 284,808 European credit card transactions — but only 492 are fraudulent. That's <span className="text-[var(--th-text)] font-semibold">0.17%</span>."</p>
+          <p>"We applied <span className="text-[var(--th-text)] font-semibold">StandardScaler</span> to normalize features because distance-based models (KNN, SVM) can't handle raw amount magnitudes. Then <span className="text-[var(--th-text)] font-semibold">SMOTE</span> balanced the training set without touching test data."</p>
+          <p>"We trained five scikit-learn models side-by-side: <span className="text-[var(--th-text)] font-semibold">Random Forest</span> won on ROC-AUC and PR-AUC — two metrics that matter more than accuracy for imbalanced data."</p>
           <p>"The Prediction Lab lets us test any 30-dimensional feature vector in real time. When V14 drops below -2, the ensemble flags the transaction with high confidence."</p>
           <p>"This is the complete fraud operations pipeline: exploration → preprocessing → training → evaluation → deployment → case management → audit."</p>
         </blockquote>

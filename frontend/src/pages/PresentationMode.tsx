@@ -45,8 +45,8 @@ export function PresentationMode() {
             { label: "Fraudulent", value: "492", color: "#FF3B30" },
             { label: "Fraud rate", value: "0.17 %", color: "#FFB800" },
           ].map((s) => (
-            <div key={s.label} className="flex items-center justify-between p-5 rounded-3xl bg-white/5 border border-white/10">
-              <span className="text-sm text-[#8A8A93] font-medium">{s.label}</span>
+            <div key={s.label} className="flex items-center justify-between p-5 rounded-3xl bg-[var(--th-subtle)] border border-[var(--th-border-strong)]">
+              <span className="text-sm text-[var(--th-text-secondary)] font-medium">{s.label}</span>
               <span className="font-mono text-3xl tnum font-light" style={{ color: s.color }}>{s.value}</span>
             </div>
           ))}
@@ -61,12 +61,12 @@ export function PresentationMode() {
       visual: (
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#8A8A93] font-bold mb-4">Before</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-[var(--th-text-secondary)] font-bold mb-4">Before</p>
             <div className="relative w-48 h-48 rounded-full bg-[#5AC8FA]/20 flex items-center justify-center">
               <div className="absolute top-2 right-4 w-3 h-3 rounded-full bg-[#FF3B30]" />
-              <span className="text-4xl font-mono tnum text-white font-light">0.17%</span>
+              <span className="text-4xl font-mono tnum text-[var(--th-text)] font-light">0.17%</span>
             </div>
-            <p className="text-xs text-[#8A8A93] mt-3">fraud</p>
+            <p className="text-xs text-[var(--th-text-secondary)] mt-3">fraud</p>
           </div>
           <ChevronRight className="w-10 h-10 text-[#C6F24E]" />
           <div className="text-center">
@@ -74,10 +74,10 @@ export function PresentationMode() {
             <div className="relative w-48 h-48 rounded-full overflow-hidden bg-[#5AC8FA]/20">
               <div className="absolute inset-0 bg-gradient-to-r from-[#5AC8FA]/30 to-[#C6F24E]/30" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-4xl font-mono tnum text-white font-light">50 / 50</span>
+                <span className="text-4xl font-mono tnum text-[var(--th-text)] font-light">50 / 50</span>
               </div>
             </div>
-            <p className="text-xs text-[#8A8A93] mt-3">balanced</p>
+            <p className="text-xs text-[var(--th-text-secondary)] mt-3">balanced</p>
           </div>
         </div>
       ),
@@ -93,12 +93,12 @@ export function PresentationMode() {
             <div key={k} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
               v.roc_auc === Math.max(...Object.values(metrics.metrics).map((m: any) => m.roc_auc))
                 ? "bg-[#C6F24E]/10 border-[#C6F24E]/30"
-                : "bg-white/5 border-white/10"
+                : "bg-[var(--th-subtle)] border-[var(--th-border-strong)]"
             }`}>
-              <span className="text-sm text-white font-medium capitalize">{k.replace("_", " ")}</span>
+              <span className="text-sm text-[var(--th-text)] font-medium capitalize">{k.replace("_", " ")}</span>
               <div className="flex items-center gap-6">
-                <span className="text-xs text-[#8A8A93]">ACC <span className="font-mono tnum text-white">{(v.accuracy * 100).toFixed(2)}%</span></span>
-                <span className="text-xs text-[#8A8A93]">AUC <span className="font-mono tnum text-[#C6F24E]">{(v.roc_auc * 100).toFixed(1)}%</span></span>
+                <span className="text-xs text-[var(--th-text-secondary)]">ACC <span className="font-mono tnum text-[var(--th-text)]">{(v.accuracy * 100).toFixed(2)}%</span></span>
+                <span className="text-xs text-[var(--th-text-secondary)]">AUC <span className="font-mono tnum text-[#C6F24E]">{(v.roc_auc * 100).toFixed(1)}%</span></span>
               </div>
             </div>
           ))}
@@ -118,10 +118,10 @@ export function PresentationMode() {
             { label: "Amount protected", value: `$${Math.round((stats?.amount_saved || 0) / 1000)}K`, color: "#5AC8FA", icon: ShieldCheck, isString: true },
             { label: "Cases resolved", value: stats?.cases?.resolved || 0, color: "#FFB800", icon: CheckCircle2 },
           ].map((s) => (
-            <div key={s.label} className="p-6 rounded-3xl bg-white/5 border border-white/10">
+            <div key={s.label} className="p-6 rounded-3xl bg-[var(--th-subtle)] border border-[var(--th-border-strong)]">
               <s.icon className="w-6 h-6 mb-3" strokeWidth={1.5} style={{ color: s.color }} />
-              <p className="font-mono text-3xl tnum font-light text-white">{s.isString ? s.value : (s.value as number).toLocaleString()}</p>
-              <p className="text-xs text-[#8A8A93] mt-2">{s.label}</p>
+              <p className="font-mono text-3xl tnum font-light text-[var(--th-text)]">{s.isString ? s.value : (s.value as number).toLocaleString()}</p>
+              <p className="text-xs text-[var(--th-text-secondary)] mt-2">{s.label}</p>
             </div>
           ))}
         </div>
@@ -138,8 +138,8 @@ export function PresentationMode() {
             <Shield strokeWidth={2} className="w-14 h-14" />
           </div>
           <div className="text-center">
-            <p className="font-display text-3xl text-white font-light">Sentinel AI</p>
-            <p className="text-[#8A8A93] text-sm">Fraud Detection Platform · v2.0</p>
+            <p className="font-display text-3xl text-[var(--th-text)] font-light">Sentinel AI</p>
+            <p className="text-[var(--th-text-secondary)] text-sm">Fraud Detection Platform · v2.0</p>
           </div>
         </div>
       ),
@@ -168,7 +168,7 @@ export function PresentationMode() {
   const current = slides[index];
 
   return (
-    <div className="fixed inset-0 bg-[#0B0B0D] z-[1000] overflow-hidden">
+    <div className="fixed inset-0 bg-[var(--th-bg)] z-[1000] overflow-hidden">
       {/* Ambient */}
       <div className="absolute top-1/3 -left-40 w-[700px] h-[700px] bg-[#C6F24E]/[0.06] blur-[160px] rounded-full" />
       <div className="absolute bottom-0 -right-40 w-[600px] h-[600px] bg-[#C6F24E]/[0.04] blur-[140px] rounded-full" />
@@ -179,7 +179,7 @@ export function PresentationMode() {
           onClick={() => setShowNotes((s) => !s)}
           data-testid="present-notes-toggle"
           className={`px-4 py-2 rounded-full text-xs font-semibold transition-all border ${
-            showNotes ? "bg-[#C6F24E] text-[#0B0B0D] border-[#C6F24E]" : "bg-[#151518] text-white border-white/10 hover:border-white/20"
+            showNotes ? "bg-[#C6F24E] text-[#0B0B0D] border-[#C6F24E]" : "bg-[var(--th-surface)] text-[var(--th-text)] border-[var(--th-border-strong)] hover:border-[var(--th-border-strong)]"
           }`}
         >
           Notes
@@ -187,7 +187,7 @@ export function PresentationMode() {
         <button
           onClick={() => setPlaying((p) => !p)}
           data-testid="present-play-toggle"
-          className="w-10 h-10 rounded-full bg-[#151518] border border-white/10 flex items-center justify-center text-white hover:border-white/20 transition-all"
+          className="w-10 h-10 rounded-full bg-[var(--th-surface)] border border-[var(--th-border-strong)] flex items-center justify-center text-[var(--th-text)] hover:border-[var(--th-border-strong)] transition-all"
         >
           {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" strokeWidth={2.5} />}
         </button>
@@ -201,12 +201,12 @@ export function PresentationMode() {
       </div>
 
       {/* Slide counter */}
-      <div className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full bg-[#151518]/80 backdrop-blur-xl border border-white/10 font-mono text-xs text-[#8A8A93] tnum">
+      <div className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full bg-[var(--th-surface)]/80 backdrop-blur-xl border border-[var(--th-border-strong)] font-mono text-xs text-[var(--th-text-secondary)] tnum">
         {String(index + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
       </div>
 
       {/* Progress bar */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/5 z-50">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--th-border)] z-50">
         <motion.div
           key={index + (playing ? "p" : "s")}
           initial={{ width: "0%" }}
@@ -231,13 +231,13 @@ export function PresentationMode() {
               <p className="text-[11px] uppercase tracking-[0.25em] text-[#C6F24E] font-bold mb-6">
                 Slide {String(index + 1).padStart(2, "0")} · Sentinel AI
               </p>
-              <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-white tracking-[-0.03em] leading-[0.95] mb-6 text-balance">
+              <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-[var(--th-text)] tracking-[-0.03em] leading-[0.95] mb-6 text-balance">
                 {current.title}
               </h2>
               <h3 className="font-display text-2xl sm:text-3xl text-[#C6F24E] font-light mb-8 text-balance">
                 {current.subtitle}
               </h3>
-              <p className="text-base sm:text-lg text-[#8A8A93] leading-relaxed max-w-xl text-balance">
+              <p className="text-base sm:text-lg text-[var(--th-text-secondary)] leading-relaxed max-w-xl text-balance">
                 {current.body}
               </p>
             </div>
@@ -255,9 +255,9 @@ export function PresentationMode() {
             initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 120, opacity: 0 }}
             className="absolute bottom-24 left-1/2 -translate-x-1/2 max-w-[640px] w-full mx-auto px-6"
           >
-            <div className="rounded-3xl bg-[#151518] border border-[#C6F24E]/20 p-5 shadow-2xl">
+            <div className="rounded-3xl bg-[var(--th-surface)] border border-[#C6F24E]/20 p-5 shadow-2xl">
               <p className="text-[10px] uppercase tracking-[0.25em] text-[#C6F24E] font-bold mb-2">Speaker notes</p>
-              <p className="text-sm text-white leading-relaxed">{current.notes}</p>
+              <p className="text-sm text-[var(--th-text)] leading-relaxed">{current.notes}</p>
             </div>
           </motion.div>
         )}
@@ -269,7 +269,7 @@ export function PresentationMode() {
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
           disabled={index === 0}
           data-testid="present-prev-btn"
-          className="w-12 h-12 rounded-full bg-[#151518] border border-white/10 flex items-center justify-center text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="w-12 h-12 rounded-full bg-[var(--th-surface)] border border-[var(--th-border-strong)] flex items-center justify-center text-[var(--th-text)] hover:border-[var(--th-border-strong)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -294,7 +294,7 @@ export function PresentationMode() {
         </button>
       </div>
 
-      <div className="absolute bottom-3 right-6 text-[10px] text-[#5A5A63] font-mono tnum">
+      <div className="absolute bottom-3 right-6 text-[10px] text-[var(--th-text-dim)] font-mono tnum">
         ← → to navigate · P to pause · N for notes · ESC to exit
       </div>
     </div>

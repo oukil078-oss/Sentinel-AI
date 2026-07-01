@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { cn } from "../lib/utils";
 import { ReactNode } from "react";
+import BorderGlow from "./ui/BorderGlow";
+import { useTheme } from "../context/ThemeContext";
 
 export function PageHeader({
   eyebrow, title, subtitle, actions,
@@ -21,11 +23,11 @@ export function PageHeader({
             {eyebrow}
           </p>
         )}
-        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-white leading-[1.05] text-balance">
+        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-[var(--th-text)] leading-[1.05] text-balance">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-3 text-sm sm:text-base text-[#8A8A93] max-w-2xl leading-relaxed">{subtitle}</p>
+          <p className="mt-3 text-sm sm:text-base text-[var(--th-text-secondary)] max-w-2xl leading-relaxed">{subtitle}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
@@ -41,17 +43,41 @@ export function Panel({
   light?: boolean;
   padding?: string;
 }) {
+  const { isDark } = useTheme();
+
+  if (light) {
+    return (
+      <div
+        className={cn(
+          "rounded-[24px] relative overflow-hidden",
+          "bg-[var(--th-invert)] text-[var(--th-invert-text)]",
+          padding,
+          className
+        )}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={cn(
-        "rounded-[24px] relative overflow-hidden",
-        light ? "bg-white text-[#0B0B0D]" : "bg-[#151518] border border-white/5",
-        padding,
-        className
-      )}
+    <BorderGlow
+      className={className}
+      borderRadius={24}
+      backgroundColor={isDark ? "#151518" : "#FFFFFF"}
+      glowColor={isDark ? "78 80 60" : "100 120 40"}
+      glowRadius={30}
+      glowIntensity={isDark ? 0.8 : 0.5}
+      edgeSensitivity={25}
+      colors={isDark
+        ? ['#C6F24E', '#9FC63B', '#151518']
+        : ['#C6F24E', '#9FC63B', '#FFFFFF']
+      }
     >
-      {children}
-    </div>
+      <div className={padding}>
+        {children}
+      </div>
+    </BorderGlow>
   );
 }
 
@@ -61,10 +87,10 @@ export function StatusPill({ status }: { status: string }) {
     in_review: "bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20",
     escalated: "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
     resolved: "bg-[#C6F24E]/10 text-[#C6F24E] border-[#C6F24E]/20",
-    false_positive: "bg-white/5 text-[#8A8A93] border-white/10",
+    false_positive: "bg-[var(--th-subtle)] text-[var(--th-text-secondary)] border-[var(--th-border-strong)]",
     legitimate: "bg-[#C6F24E]/10 text-[#C6F24E] border-[#C6F24E]/20",
     fraud: "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
-    low: "bg-white/5 text-[#8A8A93] border-white/10",
+    low: "bg-[var(--th-subtle)] text-[var(--th-text-secondary)] border-[var(--th-border-strong)]",
     medium: "bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20",
     high: "bg-[#FF8A00]/10 text-[#FF8A00] border-[#FF8A00]/20",
     critical: "bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20",
@@ -73,7 +99,7 @@ export function StatusPill({ status }: { status: string }) {
   return (
     <span className={cn(
       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-[0.12em]",
-      map[status] || "bg-white/5 text-[#8A8A93] border-white/10"
+      map[status] || "bg-[var(--th-subtle)] text-[var(--th-text-secondary)] border-[var(--th-border-strong)]"
     )}>
       {status === "new" && <span className="w-1.5 h-1.5 rounded-full bg-[#5AC8FA] pulse-dot" />}
       {status === "in_review" && <span className="w-1.5 h-1.5 rounded-full bg-[#FFB800]" />}
@@ -101,9 +127,9 @@ export function Button({
     lg: "px-7 py-3.5 text-sm",
   };
   const variants = {
-    primary: "bg-[#C6F24E] text-[#0B0B0D] hover:bg-[#D4F475] shadow-[0_4px_20px_rgba(198,242,78,0.2)] hover:shadow-[0_4px_30px_rgba(198,242,78,0.4)]",
-    secondary: "bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20",
-    ghost: "text-[#8A8A93] hover:text-white hover:bg-white/5",
+    primary: "bg-[#C6F24E] text-[#0B0B0D] hover:bg-[#D4F475] shadow-[0_4px_20px_var(--th-glow-medium)] hover:shadow-[0_4px_30px_rgba(198,242,78,0.4)]",
+    secondary: "bg-[var(--th-subtle)] text-[var(--th-text)] border border-[var(--th-border-strong)] hover:bg-[var(--th-subtle-hover)] hover:border-[var(--th-border-strong)]",
+    ghost: "text-[var(--th-text-secondary)] hover:text-[var(--th-text)] hover:bg-[var(--th-subtle)]",
     danger: "bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20 hover:bg-[#FF3B30]/20",
   };
   return (
@@ -138,7 +164,7 @@ export function Chip({
         "px-4 py-1.5 rounded-full text-xs font-medium transition-all",
         active
           ? "bg-[#C6F24E] text-[#0B0B0D] shadow-[0_0_20px_rgba(198,242,78,0.3)]"
-          : "bg-transparent text-[#8A8A93] hover:text-white"
+          : "bg-transparent text-[var(--th-text-secondary)] hover:text-[var(--th-text)]"
       )}
     >
       {children}

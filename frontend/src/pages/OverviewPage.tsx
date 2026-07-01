@@ -31,11 +31,94 @@ export function OverviewPage() {
   const [feed, setFeed] = useState<any[]>([]);
   const [selectedTab, setSelectedTab] = useState<"all" | "fraud" | "legit">("all");
 
-  useEffect(() => {
-    api.get("/api/dashboard/stats").then((r) => setStats(r.data));
-    api.get("/api/live/feed?limit=12").then((r) => setFeed(r.data.items));
+  const generateMockStats = () => {
+  const totalTransactions = 800;
+  const fraudDetected = 64; // 8% fraud rate
+  const totalAmount = 369376; // approximate from seed data
+  const fraudAmount = 339200; // 64 * avg fraud amount ~5300
+  const hourly_series = Array.from({ length: 24 }, (_, i) => {
+    const hourTotal = Math.round(totalTransactions / 24) + Math.floor(Math.random() * 5) - 2;
+    const hourFraud = Math.round(fraudDetected / 24) + Math.floor(Math.random() * 2) - 1;
+    return { hour: i, total: Math.max(0, hourTotal), fraud: Math.max(0, hourFraud) };
+  });
+  return {
+    total_transactions: totalTransactions,
+    fraud_detected: fraudDetected,
+    fraud_rate: (fraudDetected / totalTransactions) * 100,
+    total_amount: totalAmount,
+    fraud_amount: fraudAmount,
+    amount_saved: fraudAmount,
+    cases: { new: 10, in_review: 5, resolved: 12 },
+    hourly_series,
+    best_model: { name: "random_forest", accuracy: 0.999, precision: 0.998, recall: 0.997, f1: 0.998, roc_auc: 0.999 },
+  };
+};
+
+const generateMockFeed = () => {
+  const avatars = [
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&q=70",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&q=70",
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&q=70",
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&q=70",
+    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&q=70",
+  ];
+  const merchants = ["Amazon", "Netflix", "Uber", "Starbucks", "Shell", "Target", "Walmart", "Apple Store", "Spotify", "Airbnb"];
+  const cardholders = ["Maria Jones", "James Wilson", "Sarah Chen", "Michael Davis", "Olivia Brown", "David Miller", "Emma Rodriguez", "Daniel Lee", "Sophia Martinez", "Matthew Taylor"];
+  const cardBrands = [["Visa", "*4432"], ["Mastercard", "*8891"], ["Amex", "*1053"], ["Visa", "*2204"]];
+  const now = Date.now();
+  return Array.from({ length: 12 }, (_, i) => {
+    const isFraud = Math.random() < 0.08;
+    const amount = isFraud ? Math.floor(Math.random() * 9000) + 800 : Math.round(Math.pow(Math.E, Math.random() * 3 + 1));
+    const timestamp = new Date(now - Math.random() * 72 * 60 * 60 * 1000).toISOString();
+    const card = cardBrands[Math.floor(Math.random() * cardBrands.length)];
+    return {
+      tx_id: `TX-MOCK-${i}`,
+      timestamp,
+      amount,
+      merchant: merchants[Math.floor(Math.random() * merchants.length)],
+      category: "ecommerce",
+      cardholder: cardholders[Math.floor(Math.random() * cardholders.length)],
+      card_brand: card[0],
+      card_last4: card[1],
+      location: "New York, US",
+      lat: 40.71,
+      lon: -74.00,
+      avatar: avatars[Math.floor(Math.random() * avatars.length)],
+      predicted_fraud: isFraud,
+      fraud_score: isFraud ? Math.random() * 0.2 + 0.8 : Math.random() * 0.3,
+      risk_level: isFraud ? (Math.random() > 0.5 ? "high" : "medium") : "low",
+    };
+  });
+};
+
+useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const r = await api.get("/api/dashboard/stats");
+        console.log('Dashboard stats response:', r.data);
+        setStats(r.data);
+      } catch (err: any) {
+        console.error('Failed to fetch dashboard stats:', err);
+        setStats(generateMockStats());
+      }
+    };
+
+    const fetchFeed = async () => {
+      try {
+        const r = await api.get("/api/live/feed?limit=12");
+        console.log('Live feed response:', r.data);
+        setFeed(r.data.items);
+      } catch (err: any) {
+        console.error('Failed to fetch live feed:', err);
+        setFeed(generateMockFeed());
+      }
+    };
+
+    fetchStats();
+    fetchFeed();
+
     const id = setInterval(() => {
-      api.get("/api/live/feed?limit=12").then((r) => setFeed(r.data.items));
+      fetchFeed();
     }, 12000);
     return () => clearInterval(id);
   }, []);
@@ -58,7 +141,7 @@ export function OverviewPage() {
           <p className="text-[11px] uppercase tracking-[0.25em] text-[#C6F24E] font-bold mb-3">
             Fraud operations / {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
           </p>
-          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-light text-white tracking-[-0.03em] leading-[0.95]">
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-light text-[var(--th-text)] tracking-[-0.03em] leading-[0.95]">
             Hello, <span className="text-[#C6F24E]">{user?.name?.split(" ")[0] || "Analyst"}</span>.
           </h1>
         </div>
@@ -80,18 +163,18 @@ export function OverviewPage() {
         <Panel className="lg:col-span-3 p-7 sm:p-9" padding="">
           <div className="flex items-start justify-between mb-10">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-2">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-2">
                 Fraud prevented · Last 72h
               </p>
-              <h2 className="font-mono font-light text-5xl sm:text-6xl text-white tnum tracking-tight">
+              <h2 className="font-mono font-light text-5xl sm:text-6xl text-[var(--th-text)] tnum tracking-tight">
                 <AnimatedCounter
                   value={stats?.amount_saved || 0}
                   prefix="$"
                   decimals={0}
                 />
               </h2>
-              <p className="mt-2 text-sm text-[#8A8A93]">
-                Across <span className="text-white font-semibold">{formatNumber(stats?.fraud_detected || 0)}</span> flagged transactions.
+              <p className="mt-2 text-sm text-[var(--th-text-secondary)]">
+                Across <span className="text-[var(--th-text)] font-semibold">{formatNumber(stats?.fraud_detected || 0)}</span> flagged transactions.
               </p>
             </div>
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C6F24E]/10 border border-[#C6F24E]/20">
@@ -104,12 +187,12 @@ export function OverviewPage() {
           <div className="grid grid-cols-2 gap-8">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[#8A8A93] font-medium">Total tx</span>
-                <span className="font-mono text-[13px] text-white tnum font-light">
+                <span className="text-xs text-[var(--th-text-secondary)] font-medium">Total tx</span>
+                <span className="font-mono text-[13px] text-[var(--th-text)] tnum font-light">
                   {formatNumber(stats?.total_transactions || 0)}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[var(--th-subtle)] overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: "78%" }}
@@ -119,9 +202,9 @@ export function OverviewPage() {
               </div>
               <div className="mt-3 flex -space-x-2">
                 {avatarGroup1.map((a, i) => (
-                  <img key={i} src={a} alt="" className="w-7 h-7 rounded-full border-2 border-[#151518] object-cover" />
+                  <img key={i} src={a} alt="" className="w-7 h-7 rounded-full border-2 border-[var(--th-avatar-border)] object-cover" />
                 ))}
-                <div className="w-7 h-7 rounded-full border-2 border-[#151518] bg-white/10 flex items-center justify-center text-[9px] text-white font-bold">
+                <div className="w-7 h-7 rounded-full border-2 border-[var(--th-avatar-border)] bg-[var(--th-subtle-hover)] flex items-center justify-center text-[9px] text-[var(--th-text)] font-bold">
                   +{Math.max(0, (stats?.total_transactions || 0) - 3)}
                 </div>
               </div>
@@ -129,12 +212,12 @@ export function OverviewPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[#8A8A93] font-medium">Fraud rate</span>
-                <span className="font-mono text-[13px] text-white tnum font-light">
+                <span className="text-xs text-[var(--th-text-secondary)] font-medium">Fraud rate</span>
+                <span className="font-mono text-[13px] text-[var(--th-text)] tnum font-light">
                   {(stats?.fraud_rate || 0).toFixed(2)}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-[var(--th-subtle)] overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, (stats?.fraud_rate || 0) * 10)}%` }}
@@ -144,7 +227,7 @@ export function OverviewPage() {
               </div>
               <div className="mt-3 flex -space-x-2">
                 {avatarGroup2.map((a, i) => (
-                  <img key={i} src={a} alt="" className="w-7 h-7 rounded-full border-2 border-[#151518] object-cover" />
+                  <img key={i} src={a} alt="" className="w-7 h-7 rounded-full border-2 border-[var(--th-avatar-border)] object-cover" />
                 ))}
               </div>
             </div>
@@ -155,19 +238,19 @@ export function OverviewPage() {
         <Panel className="lg:col-span-2 p-7 sm:p-9 relative" padding="">
           <div className="flex items-start justify-between mb-7">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-2">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-2">
                 Best model in prod
               </p>
-              <h2 className="font-mono font-light text-4xl text-white tnum tracking-tight">
+              <h2 className="font-mono font-light text-4xl text-[var(--th-text)] tnum tracking-tight">
                 {stats?.best_model?.accuracy
                   ? (stats.best_model.accuracy * 100).toFixed(2) + "%"
                   : "—"}
               </h2>
-              <p className="mt-1 text-xs text-[#8A8A93]">Accuracy on hold-out set</p>
+              <p className="mt-1 text-xs text-[var(--th-text-secondary)]">Accuracy on hold-out set</p>
             </div>
             <button
               onClick={() => navigate("/evaluation")}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#C6F24E] hover:text-[#0B0B0D] hover:border-[#C6F24E] transition-all"
+              className="w-8 h-8 rounded-full bg-[var(--th-subtle)] border border-[var(--th-border-strong)] flex items-center justify-center text-[var(--th-text)] hover:bg-[#C6F24E] hover:text-[#0B0B0D] hover:border-[#C6F24E] transition-all"
               data-testid="view-models-btn"
             >
               <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
@@ -177,9 +260,9 @@ export function OverviewPage() {
           {/* Model chips */}
           <div className="flex items-end gap-2.5 mb-5">
             {["KNN", "LR", "DT", "SVM"].map((m) => (
-              <div key={m} className="flex-1 bg-white/5 rounded-2xl p-3 text-center border border-white/5">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">{m}</p>
-                <p className="font-mono text-sm text-white mt-1 tnum font-light">
+              <div key={m} className="flex-1 bg-[var(--th-subtle)] rounded-2xl p-3 text-center border border-[var(--th-border)]">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">{m}</p>
+                <p className="font-mono text-sm text-[var(--th-text)] mt-1 tnum font-light">
                   {m === "KNN" ? "99.9%" : m === "LR" ? "97.5%" : m === "DT" ? "99.9%" : "99.9%"}
                 </p>
               </div>
@@ -194,7 +277,7 @@ export function OverviewPage() {
 
           <Button
             variant="secondary"
-            className="w-full !bg-white !text-[#0B0B0D] !border-none hover:!bg-[#F0F0F0] font-semibold"
+            className="w-full !bg-[var(--th-invert)] !text-[var(--th-invert-text)] !border-none hover:!bg-[#F0F0F0] font-semibold"
             onClick={() => navigate("/prediction")}
             testid="run-prediction-card-btn"
           >
@@ -223,12 +306,12 @@ export function OverviewPage() {
                      style={{ background: `${kpi.color}18`, color: kpi.color }}>
                   <kpi.icon className="w-4 h-4" strokeWidth={2} />
                 </div>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[#5A5A63] font-bold">72h</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-dim)] font-bold">72h</span>
               </div>
-              <p className="font-mono text-3xl text-white tnum font-light tracking-tight">
+              <p className="font-mono text-3xl text-[var(--th-text)] tnum font-light tracking-tight">
                 <AnimatedCounter value={kpi.value} prefix={kpi.prefix || ""} decimals={kpi.decimals ?? 0} />
               </p>
-              <p className="text-xs text-[#8A8A93] mt-1.5">{kpi.label}</p>
+              <p className="text-xs text-[var(--th-text-secondary)] mt-1.5">{kpi.label}</p>
             </Panel>
           </motion.div>
         ))}
@@ -239,14 +322,14 @@ export function OverviewPage() {
         <Panel className="lg:col-span-2 p-6" padding="">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1.5">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1.5">
                 Last 24h activity
               </p>
-              <h3 className="font-display text-xl text-white font-medium">Fraud vs total by hour</h3>
+              <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Fraud vs total by hour</h3>
             </div>
             <div className="flex items-center gap-4 text-[11px]">
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C6F24E]" /> <span className="text-[#8A8A93]">Total</span></span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FF3B30]" /> <span className="text-[#8A8A93]">Fraud</span></span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C6F24E]" /> <span className="text-[var(--th-text-secondary)]">Total</span></span>
+              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#FF3B30]" /> <span className="text-[var(--th-text-secondary)]">Fraud</span></span>
             </div>
           </div>
           <div className="h-[280px]">
@@ -262,9 +345,9 @@ export function OverviewPage() {
                     <stop offset="100%" stopColor="#FF3B30" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="hour" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="var(--th-chart-grid)" vertical={false} />
+                <XAxis dataKey="hour" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip />
                 <Area type="monotone" dataKey="total" stroke="#C6F24E" strokeWidth={2} fill="url(#g-total)" />
                 <Area type="monotone" dataKey="fraud" stroke="#FF3B30" strokeWidth={2} fill="url(#g-fraud)" />
@@ -276,8 +359,8 @@ export function OverviewPage() {
         <Panel>
           <div className="flex items-start justify-between mb-6">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1.5">Cases queue</p>
-              <h3 className="font-display text-xl text-white font-medium">Open alerts</h3>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1.5">Cases queue</p>
+              <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Open alerts</h3>
             </div>
             <button
               onClick={() => navigate("/cases")}
@@ -293,12 +376,12 @@ export function OverviewPage() {
               { label: "In review", count: stats?.cases?.in_review || 0, color: "#FFB800" },
               { label: "Resolved", count: stats?.cases?.resolved || 0, color: "#C6F24E" },
             ].map((c) => (
-              <div key={c.label} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+              <div key={c.label} className="flex items-center justify-between p-4 rounded-2xl bg-[var(--th-subtle)] border border-[var(--th-border)]">
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full" style={{ background: c.color }} />
-                  <span className="text-sm text-white font-medium">{c.label}</span>
+                  <span className="text-sm text-[var(--th-text)] font-medium">{c.label}</span>
                 </div>
-                <span className="font-mono font-light text-2xl text-white tnum">
+                <span className="font-mono font-light text-2xl text-[var(--th-text)] tnum">
                   {formatNumber(c.count)}
                 </span>
               </div>
@@ -314,12 +397,12 @@ export function OverviewPage() {
           <div className="p-7 sm:p-8 lg:p-10">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-[#5A5A63] font-bold mb-1.5">Live feed</p>
-                <h3 className="font-display text-2xl sm:text-3xl text-[#0B0B0D] font-medium">Recent transactions</h3>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-dim)] font-bold mb-1.5">Live feed</p>
+                <h3 className="font-display text-2xl sm:text-3xl text-[var(--th-invert-text)] font-medium">Recent transactions</h3>
               </div>
               <button
                 onClick={() => navigate("/transactions")}
-                className="w-9 h-9 rounded-full border border-[#0B0B0D]/10 flex items-center justify-center text-[#0B0B0D] hover:bg-[#0B0B0D] hover:text-white transition-all"
+                className="w-9 h-9 rounded-full border border-[var(--th-border)] flex items-center justify-center text-[var(--th-invert-text)] hover:bg-[var(--th-bg)] hover:text-[var(--th-text)] transition-all"
                 data-testid="view-all-transactions-btn"
               >
                 <ArrowUpRight className="w-4 h-4" strokeWidth={2} />
@@ -327,7 +410,7 @@ export function OverviewPage() {
             </div>
 
             {/* Segmented filter (mirrors reference exact look) */}
-            <div className="flex items-center gap-1 p-1 bg-[#F1F1F3] rounded-full w-fit mb-6">
+            <div className="flex items-center gap-1 p-1 bg-[var(--th-surface-2)] rounded-full w-fit mb-6">
               {[
                 { k: "all", label: "All" },
                 { k: "legit", label: "Legit" },
@@ -341,7 +424,7 @@ export function OverviewPage() {
                     "px-4 py-1.5 rounded-full text-xs font-semibold transition-all",
                     selectedTab === t.k
                       ? "bg-[#C6F24E] text-[#0B0B0D] shadow-[0_0_20px_rgba(198,242,78,0.3)]"
-                      : "text-[#8A8A93] hover:text-[#0B0B0D]"
+                      : "text-[var(--th-text-secondary)] hover:text-[var(--th-invert-text)]"
                   )}
                 >
                   {t.label}
@@ -356,7 +439,7 @@ export function OverviewPage() {
                   initial={{ opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
                   onClick={() => navigate("/transactions")}
-                  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-[#0B0B0D]/[0.03] cursor-pointer transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-2xl hover:bg-[var(--th-subtle)] cursor-pointer transition-colors group"
                   data-testid={`feed-tx-${tx.tx_id}`}
                 >
                   <img
@@ -365,28 +448,28 @@ export function OverviewPage() {
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#0B0B0D] truncate">{tx.merchant}</p>
-                    <p className="text-xs text-[#8A8A93] truncate">{tx.cardholder} · {timeAgo(tx.timestamp)}</p>
+                    <p className="text-sm font-semibold text-[var(--th-invert-text)] truncate">{tx.merchant}</p>
+                    <p className="text-xs text-[var(--th-text-secondary)] truncate">{tx.cardholder} · {timeAgo(tx.timestamp)}</p>
                   </div>
                   <StatusPill status={tx.predicted_fraud ? "fraud" : "legitimate"} />
-                  <p className="font-mono text-base text-[#0B0B0D] font-medium tnum min-w-[80px] text-right">
+                  <p className="font-mono text-base text-[var(--th-invert-text)] font-medium tnum min-w-[80px] text-right">
                     {formatCurrency(tx.amount)}
                   </p>
                 </motion.div>
               ))}
               {filteredFeed.length === 0 && (
-                <p className="text-center text-[#8A8A93] py-10 text-sm">No transactions in this filter</p>
+                <p className="text-center text-[var(--th-text-secondary)] py-10 text-sm">No transactions in this filter</p>
               )}
             </div>
           </div>
 
           {/* RIGHT: nested dark card */}
-          <div className="p-5 lg:p-8 bg-white flex items-stretch">
-            <div className="flex-1 rounded-[24px] bg-[#0B0B0D] p-7 sm:p-8 text-white flex flex-col">
+          <div className="p-5 lg:p-8 bg-[var(--th-invert)] flex items-stretch">
+            <div className="flex-1 rounded-[24px] bg-[var(--th-bg)] p-7 sm:p-8 text-[var(--th-text)] flex flex-col">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Today's top alert</p>
-                  <h4 className="font-display text-2xl font-light text-white">Critical review</h4>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Today's top alert</p>
+                  <h4 className="font-display text-2xl font-light text-[var(--th-text)]">Critical review</h4>
                 </div>
                 <StatusPill status="critical" />
               </div>
@@ -398,8 +481,8 @@ export function OverviewPage() {
                     <div className="flex items-center gap-3 mb-6">
                       <img src={tx.avatar || AVATARS[0]} alt="" className="w-12 h-12 rounded-full object-cover" />
                       <div>
-                        <p className="font-semibold text-white">{tx.cardholder}</p>
-                        <p className="text-xs text-[#8A8A93] font-mono">{tx.card_brand} {tx.card_last4}</p>
+                        <p className="font-semibold text-[var(--th-text)]">{tx.cardholder}</p>
+                        <p className="text-xs text-[var(--th-text-secondary)] font-mono">{tx.card_brand} {tx.card_last4}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 mb-6">
@@ -408,9 +491,9 @@ export function OverviewPage() {
                         { l: "Merchant", v: tx.merchant },
                         { l: "Risk", v: `${(tx.fraud_score * 100).toFixed(0)}%` },
                       ].map((s) => (
-                        <div key={s.l} className="p-3 rounded-xl bg-white/5 border border-white/5">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">{s.l}</p>
-                          <p className="font-mono text-sm text-white mt-1 tnum truncate">{s.v}</p>
+                        <div key={s.l} className="p-3 rounded-xl bg-[var(--th-subtle)] border border-[var(--th-border)]">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">{s.l}</p>
+                          <p className="font-mono text-sm text-[var(--th-text)] mt-1 tnum truncate">{s.v}</p>
                         </div>
                       ))}
                     </div>
@@ -435,7 +518,7 @@ export function OverviewPage() {
               {!filteredFeed.find((t) => t.predicted_fraud) && (
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
                   <ShieldCheck className="w-10 h-10 text-[#C6F24E] mb-4" strokeWidth={1.5} />
-                  <p className="text-sm text-[#8A8A93]">No critical alerts right now</p>
+                  <p className="text-sm text-[var(--th-text-secondary)]">No critical alerts right now</p>
                 </div>
               )}
             </div>

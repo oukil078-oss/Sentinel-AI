@@ -79,8 +79,8 @@ export function RulesPage() {
                       <Icon className="w-5 h-5" strokeWidth={2} />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">{r.rule_type}</p>
-                      <h3 className="text-sm font-semibold text-white">{r.name}</h3>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">{r.rule_type}</p>
+                      <h3 className="text-sm font-semibold text-[var(--th-text)]">{r.name}</h3>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -88,16 +88,16 @@ export function RulesPage() {
                   </div>
                 </div>
 
-                <p className="text-xs text-[#8A8A93] leading-relaxed mb-4 min-h-[36px]">{r.description}</p>
+                <p className="text-xs text-[var(--th-text-secondary)] leading-relaxed mb-4 min-h-[36px]">{r.description}</p>
 
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 mb-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-[#5A5A63] font-bold mb-1">Condition</p>
+                <div className="p-3 rounded-xl bg-[var(--th-subtle)] border border-[var(--th-border)] mb-4">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-dim)] font-bold mb-1">Condition</p>
                   <code className="text-xs font-mono text-[#C6F24E]">{r.condition}</code>
                 </div>
 
                 <div className="flex items-center justify-between text-xs mb-4">
-                  <span className="text-[#8A8A93]">Action: <span className="text-white font-semibold capitalize">{r.action}</span></span>
-                  <span className="text-[#8A8A93]">Hits: <span className="font-mono text-white tnum font-semibold">{formatNumber(r.hits || 0)}</span></span>
+                  <span className="text-[var(--th-text-secondary)]">Action: <span className="text-[var(--th-text)] font-semibold capitalize">{r.action}</span></span>
+                  <span className="text-[var(--th-text-secondary)]">Hits: <span className="font-mono text-[var(--th-text)] tnum font-semibold">{formatNumber(r.hits || 0)}</span></span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export function RulesPage() {
                   <button
                     onClick={() => removeRule(r.id)}
                     data-testid={`rule-delete-${r.name.replace(/\s/g, "-")}`}
-                    className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#8A8A93] hover:text-[#FF3B30] hover:bg-[#FF3B30]/10 hover:border-[#FF3B30]/20 transition-all"
+                    className="w-9 h-9 rounded-full bg-[var(--th-subtle)] border border-[var(--th-border-strong)] flex items-center justify-center text-[var(--th-text-secondary)] hover:text-[#FF3B30] hover:bg-[#FF3B30]/10 hover:border-[#FF3B30]/20 transition-all"
                   >
                     <Trash2 className="w-4 h-4" strokeWidth={1.8} />
                   </button>
@@ -129,54 +129,54 @@ export function RulesPage() {
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-xl bg-[#151518] border border-white/10 rounded-[24px] p-8"
+            className="w-full max-w-xl bg-[var(--th-surface)] border border-[var(--th-border-strong)] rounded-[24px] p-8"
           >
             <div className="flex items-start justify-between mb-6">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-[#C6F24E] font-bold mb-1.5">New rule</p>
-                <h2 className="font-display text-2xl text-white font-medium">Create a detection rule</h2>
+                <h2 className="font-display text-2xl text-[var(--th-text)] font-medium">Create a detection rule</h2>
               </div>
-              <button onClick={() => setModalOpen(false)} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10">
+              <button onClick={() => setModalOpen(false)} className="w-9 h-9 rounded-full bg-[var(--th-subtle)] flex items-center justify-center text-[var(--th-text)] hover:bg-[var(--th-subtle-hover)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Name</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Name</label>
                 <input
                   type="text" value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   data-testid="new-rule-name"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-[#C6F24E]/50 focus:outline-none"
+                  className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] focus:border-[#C6F24E]/50 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Description</label>
+                <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Description</label>
                 <input
                   type="text" value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   data-testid="new-rule-desc"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-[#C6F24E]/50 focus:outline-none"
+                  className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] focus:border-[#C6F24E]/50 focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Type</label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Type</label>
                   <select
                     value={form.rule_type}
                     onChange={(e) => setForm({ ...form, rule_type: e.target.value as any })}
-                    className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-[#C6F24E]/50 focus:outline-none"
+                    className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] focus:border-[#C6F24E]/50 focus:outline-none"
                   >
                     {["amount", "velocity", "geo", "time", "merchant"].map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Action</label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Action</label>
                   <select
                     value={form.action}
                     onChange={(e) => setForm({ ...form, action: e.target.value as any })}
-                    className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-[#C6F24E]/50 focus:outline-none"
+                    className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] focus:border-[#C6F24E]/50 focus:outline-none"
                   >
                     {["flag", "review", "block"].map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -184,20 +184,20 @@ export function RulesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Condition</label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Condition</label>
                   <input
                     type="text" value={form.condition}
                     onChange={(e) => setForm({ ...form, condition: e.target.value })}
                     placeholder="e.g. amount > 5000"
-                    className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white font-mono focus:border-[#C6F24E]/50 focus:outline-none"
+                    className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] font-mono focus:border-[#C6F24E]/50 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">Severity</label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">Severity</label>
                   <select
                     value={form.severity}
                     onChange={(e) => setForm({ ...form, severity: e.target.value as any })}
-                    className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:border-[#C6F24E]/50 focus:outline-none"
+                    className="w-full mt-1.5 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-2xl px-4 py-3 text-sm text-[var(--th-text)] focus:border-[#C6F24E]/50 focus:outline-none"
                   >
                     {["low", "medium", "high", "critical"].map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>

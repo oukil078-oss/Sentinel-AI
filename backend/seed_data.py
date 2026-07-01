@@ -53,8 +53,9 @@ CARDS = [
 ]
 
 
-def _random_transaction(engine, rng, hours_ago_max=72) -> dict:
-    is_fraud = rng.random() < 0.08  # 8% fraud rate in demo
+def _random_transaction(rng, is_fraud=None, hours_ago_max=72) -> dict:
+    if is_fraud is None:
+        is_fraud = rng.random() < 0.08  # 8% fraud rate in demo
     now = datetime.now(timezone.utc)
     ts = now - timedelta(
         hours=rng.uniform(0, hours_ago_max),
@@ -72,7 +73,7 @@ def _random_transaction(engine, rng, hours_ago_max=72) -> dict:
         amount = round(rng.lognormal(3.0, 1.2), 2)
     amount = min(amount, 25000)
 
-    # Generate realistic V1-V28 based on fraud or not (using engine's trained distribution)
+    # Generate realistic V1-V28 based on fraud or not
     v_vec = rng.normal(0, 1, 28)
     if is_fraud:
         v_vec[13] += rng.normal(-6.5, 2.5)
@@ -84,17 +85,6 @@ def _random_transaction(engine, rng, hours_ago_max=72) -> dict:
     features = {f"V{i+1}": float(v_vec[i]) for i in range(28)}
     features["Time"] = float(ts.timestamp() % 172800)
     features["Amount"] = float(amount)
-
-    # Real model prediction!
-    try:
-        pred = engine.predict(features, model="random_forest", threshold=0.5)
-        score = pred["probability"]
-        predicted_fraud = pred["is_fraud"]
-        risk = pred["risk_level"]
-    except Exception:
-        score = 0.8 if is_fraud else 0.05
-        predicted_fraud = is_fraud
-        risk = "high" if is_fraud else "low"
 
     tx_id = f"TX-{int(ts.timestamp())}-{rng.integers(1000, 9999)}"
 
@@ -111,9 +101,6 @@ def _random_transaction(engine, rng, hours_ago_max=72) -> dict:
         "location": location,
         "lat": lat, "lon": lon,
         "avatar": avatar,
-        "fraud_score": round(float(score), 4),
-        "predicted_fraud": bool(predicted_fraud),
-        "risk_level": risk,
         "is_ground_truth_fraud": is_fraud,
         **features,
     }
@@ -125,7 +112,53 @@ async def seed_demo_transactions(db, engine, target: int = 800):
         print(f"[seed] {existing} transactions already present, skipping")
         return
     rng = np.random.default_rng(seed=7)
-    to_insert = [_random_transaction(engine, rng) for _ in range(target - existing)]
+    count = target - existing
+    to_insert = [_random_transaction(rng) for _ in range(count)]
+
+    # Batch predict all transactions to avoid single-row prediction overhead!
+    if to_insert and "random_forest" in engine.models:
+        try:
+            rf = engine.models["random_forest"]
+            scaler = engine.scaler
+            features_list = []
+            for tx in to_insert:
+                row = [tx[n] for n in engine._feature_names]
+                features_list.append(row)
+            
+            X_batch = np.array(features_list)
+            X_batch_s = scaler.transform(X_batch)
+            probs = rf.predict_proba(X_batch_s)[:, 1]
+
+            for i, tx in enumerate(to_insert):
+                prob = float(probs[i])
+                is_fraud = prob >= 0.5
+                if prob >= 0.85:
+                    risk = "critical"
+                elif prob >= 0.6:
+                    risk = "high"
+                elif prob >= 0.3:
+                    risk = "medium"
+                else:
+                    risk = "low"
+                tx["fraud_score"] = round(prob, 4)
+                tx["predicted_fraud"] = is_fraud
+                tx["risk_level"] = risk
+        except Exception as e:
+            print(f"[seed] Error during batch prediction: {e}. Falling back to default heuristics.")
+            # Fallback
+            for tx in to_insert:
+                is_fraud = tx["is_ground_truth_fraud"]
+                tx["fraud_score"] = 0.8 if is_fraud else 0.05
+                tx["predicted_fraud"] = is_fraud
+                tx["risk_level"] = "high" if is_fraud else "low"
+    else:
+        # Fallback if model not trained
+        for tx in to_insert:
+            is_fraud = tx["is_ground_truth_fraud"]
+            tx["fraud_score"] = 0.8 if is_fraud else 0.05
+            tx["predicted_fraud"] = is_fraud
+            tx["risk_level"] = "high" if is_fraud else "low"
+
     if to_insert:
         await db.transactions.insert_many(to_insert)
         print(f"[seed] Inserted {len(to_insert)} transactions")

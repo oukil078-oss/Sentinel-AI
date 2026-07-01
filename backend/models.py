@@ -52,6 +52,7 @@ class CaseCreate(BaseModel):
     priority: Literal["low", "medium", "high", "critical"] = "medium"
     assignee: Optional[str] = None
     risk_score: float = 0.0
+    note: Optional[str] = None
 
 
 class CaseUpdate(BaseModel):

@@ -45,10 +45,10 @@ export function PreprocessingPage() {
                      style={{ background: `${step.accent}18`, color: step.accent }}>
                   <step.icon className="w-5 h-5" strokeWidth={2} />
                 </div>
-                <h3 className="font-display text-lg text-white font-medium">{step.title}</h3>
+                <h3 className="font-display text-lg text-[var(--th-text)] font-medium">{step.title}</h3>
               </div>
-              <p className="text-sm text-[#8A8A93] leading-relaxed mb-4 min-h-[72px]">{step.desc}</p>
-              <pre className="p-4 rounded-2xl bg-black/40 border border-white/5 text-[11px] font-mono text-[#C6F24E] overflow-x-auto">
+              <p className="text-sm text-[var(--th-text-secondary)] leading-relaxed mb-4 min-h-[72px]">{step.desc}</p>
+              <pre className="p-4 rounded-2xl bg-black/40 border border-[var(--th-border)] text-[11px] font-mono text-[#C6F24E] overflow-x-auto">
                 {step.code}
               </pre>
             </Panel>
@@ -60,8 +60,8 @@ export function PreprocessingPage() {
       <Panel>
         <div className="flex items-start justify-between mb-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">SMOTE impact</p>
-            <h3 className="font-display text-2xl text-white font-medium">Class balance · Before vs After</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">SMOTE impact</p>
+            <h3 className="font-display text-2xl text-[var(--th-text)] font-medium">Class balance · Before vs After</h3>
           </div>
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#C6F24E]/10 border border-[#C6F24E]/20 text-[#C6F24E] text-xs font-bold">
             <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2.5} /> Applied on training only
@@ -70,9 +70,9 @@ export function PreprocessingPage() {
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={BEFORE_AFTER}>
-              <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-              <XAxis dataKey="stage" stroke="#8A8A93" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
+              <CartesianGrid stroke="var(--th-chart-grid)" vertical={false} />
+              <XAxis dataKey="stage" stroke="var(--th-text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
               <Tooltip />
               <Bar dataKey="legit" fill="#5AC8FA" name="Legitimate" radius={[8, 8, 0, 0]} />
               <Bar dataKey="fraud" fill="#C6F24E" name="Fraud (after SMOTE)" radius={[8, 8, 0, 0]} />
@@ -80,13 +80,13 @@ export function PreprocessingPage() {
           </ResponsiveContainer>
         </div>
         <div className="grid grid-cols-2 gap-4 mt-6">
-          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold mb-1">Before</p>
-            <p className="text-sm text-white">0.22% fraud · highly imbalanced · model biased to majority class</p>
+          <div className="p-4 rounded-2xl bg-[var(--th-subtle)] border border-[var(--th-border)]">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold mb-1">Before</p>
+            <p className="text-sm text-[var(--th-text)]">0.22% fraud · highly imbalanced · model biased to majority class</p>
           </div>
           <div className="p-4 rounded-2xl bg-[#C6F24E]/[0.05] border border-[#C6F24E]/10">
             <p className="text-[10px] uppercase tracking-[0.2em] text-[#C6F24E] font-bold mb-1">After</p>
-            <p className="text-sm text-white">50 / 50 class split · synthetic samples interpolated in feature space</p>
+            <p className="text-sm text-[var(--th-text)]">50 / 50 class split · synthetic samples interpolated in feature space</p>
           </div>
         </div>
       </Panel>
@@ -98,8 +98,8 @@ export function PreprocessingPage() {
             <AlertTriangle className="w-4 h-4" strokeWidth={2} />
           </div>
           <div>
-            <h4 className="font-semibold text-white mb-1">Don't SMOTE the test set</h4>
-            <p className="text-xs text-[#8A8A93] leading-relaxed">
+            <h4 className="font-semibold text-[var(--th-text)] mb-1">Don't SMOTE the test set</h4>
+            <p className="text-xs text-[var(--th-text-secondary)] leading-relaxed">
               Oversampling the test set inflates metrics and hides model weaknesses.
               We evaluate on the original, stratified hold-out split — so every metric here is honest.
             </p>

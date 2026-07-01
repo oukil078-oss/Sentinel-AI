@@ -20,8 +20,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   if (user === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0D]">
-        <div className="flex items-center gap-3 text-[#8A8A93]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--th-bg)]">
+        <div className="flex items-center gap-3 text-[var(--th-text-secondary)]">
           <div className="w-2 h-2 rounded-full bg-[#C6F24E] pulse-dot" />
           <span className="font-mono text-sm tracking-tight">Verifying session…</span>
         </div>

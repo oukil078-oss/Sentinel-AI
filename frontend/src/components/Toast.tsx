@@ -32,16 +32,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 80, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="pointer-events-auto flex items-center gap-3 pl-4 pr-5 py-3 rounded-2xl glass border border-white/10 shadow-2xl min-w-[280px] max-w-[380px]"
+              className="pointer-events-auto flex items-center gap-3 pl-4 pr-5 py-3 rounded-2xl glass border border-[var(--th-border-strong)] shadow-2xl min-w-[280px] max-w-[380px]"
               data-testid={`toast-${t.type}`}
             >
               {t.type === "success" && <CheckCircle2 className="w-5 h-5 text-[#C6F24E] shrink-0" strokeWidth={2} />}
               {t.type === "error" && <AlertCircle className="w-5 h-5 text-[#FF3B30] shrink-0" strokeWidth={2} />}
               {t.type === "info" && <Info className="w-5 h-5 text-[#5AC8FA] shrink-0" strokeWidth={2} />}
-              <p className="text-sm text-white font-medium flex-1">{t.message}</p>
+              <p className="text-sm text-[var(--th-text)] font-medium flex-1">{t.message}</p>
               <button
                 onClick={() => setToasts((p) => p.filter((x) => x.id !== t.id))}
-                className="text-[#8A8A93] hover:text-white"
+                className="text-[var(--th-text-secondary)] hover:text-[var(--th-text)]"
               >
                 <X className="w-4 h-4" strokeWidth={2} />
               </button>

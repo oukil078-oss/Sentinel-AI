@@ -1,0 +1,20 @@
+- [x] Create `GlassSurface` component files
+  - [x] Write `frontend/src/components/ui/GlassSurface.tsx`
+  - [x] Write `frontend/src/components/ui/GlassSurface.css`
+- [x] Create `DotField` component files
+  - [x] Write `frontend/src/components/ui/DotField.tsx`
+  - [x] Write `frontend/src/components/ui/DotField.css`
+- [x] Create `BorderGlow` component files
+  - [x] Write `frontend/src/components/ui/BorderGlow.tsx`
+  - [x] Write `frontend/src/components/ui/BorderGlow.css`
+- [x] Integrate components into application
+  - [x] Update `ui.tsx` to wrap panels in `<BorderGlow />`
+  - [x] Update `Layout.tsx` to apply `<GlassSurface />` to active sidebar buttons
+  - [x] Update `Layout.tsx` to add `<DotField />` to layout background
+- [x] Refined visual components & database integrations
+  - [x] Enforce dark fallback styles in `GlassSurface` CSS to support OS light theme preferences.
+  - [x] Resolve BSON ObjectId errors for cases and rules on Postgres backend.
+  - [x] Refactor Transaction Explorer details into a centered popup Modal.
+  - [x] Support priority, title, description, and custom investigation notes during case creation from the transaction modal.
+- [x] Verify execution
+  - [x] Check compiler output and build correctness

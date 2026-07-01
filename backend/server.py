@@ -15,8 +15,6 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request, Response, Depends, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from motor.motor_asyncio import AsyncIOMotorClient
-from bson import ObjectId
 
 from models import (
     LoginRequest, PredictRequest, CaseCreate, CaseUpdate,
@@ -29,6 +27,11 @@ from auth import (
 )
 from ml_engine import FraudEngine
 from seed_data import seed_demo_transactions, seed_rules, seed_cases
+from database import Database
+def parse_oid(id_str: str):
+    if isinstance(id_str, str) and id_str.isdigit():
+        return int(id_str)
+    return id_str
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("sentinel")
@@ -36,15 +39,13 @@ logger = logging.getLogger("sentinel")
 # ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
-MONGO_URL = os.environ["MONGO_URL"]
-DB_NAME = os.environ["DB_NAME"]
+DATABASE_URL = os.environ["DATABASE_URL"]
 JWT_SECRET = os.environ["JWT_SECRET"]
 ADMIN_EMAIL = os.environ["ADMIN_EMAIL"]
 ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "*")
 
-client = AsyncIOMotorClient(MONGO_URL)
-db = client[DB_NAME]
+db = Database()
 engine = FraudEngine(model_dir=str(Path(__file__).parent / "models_cache"))
 
 
@@ -91,43 +92,53 @@ async def ensure_indexes():
     await db.audit_log.create_index("created_at")
 
 
-async def train_models_async():
-    """Train ML models in background thread on startup."""
+async def train_models_async(force: bool = False) -> bool:
+    """Train ML models in background thread on startup. Returns True if trained, False if loaded."""
     try:
-        if engine.is_trained():
+        if engine.is_trained() and not force:
             logger.info("✓ Loading cached ML models from disk")
             engine.load()
+            return False
         else:
             logger.info("⟳ Training ML models (this runs once, ~30s)...")
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(None, engine.train_all)
             logger.info("✓ Models trained and saved")
-        metrics = engine.get_all_metrics()
-        await db.ml_metrics.delete_many({})
-        await db.ml_metrics.insert_one({
-            "metrics": metrics,
-            "trained_at": datetime.now(timezone.utc),
-            "dataset_size": engine.dataset_size,
-            "smote_applied": True,
-        })
+            metrics = engine.get_all_metrics()
+            await db.ml_metrics.delete_many({})
+            await db.ml_metrics.insert_one({
+                "metrics": metrics,
+                "trained_at": datetime.now(timezone.utc),
+                "dataset_size": engine.dataset_size,
+                "smote_applied": True,
+            })
+            return True
     except Exception as e:
         logger.exception(f"Model training failed: {e}")
+        return False
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await db.connect()
     await ensure_indexes()
     await seed_admin()
 
-    # Train models and seed demo data in parallel on startup
-    await train_models_async()
+    # Train models and seed demo data on startup
+    was_trained = await train_models_async()
+    if was_trained:
+        logger.info("🧹 Models were retrained. Clearing old synthetic transactions/cases from database for fresh seeding...")
+        await db.transactions.delete_many({})
+        await db.cases.delete_many({})
+        await db.rules.delete_many({})
+
     await seed_demo_transactions(db, engine, target=800)
     await seed_rules(db)
     await seed_cases(db, engine)
 
     logger.info("🚀 Sentinel AI backend ready")
     yield
-    client.close()
+    await db.disconnect()
 
 
 # ---------------------------------------------------------------------------
@@ -365,7 +376,9 @@ async def predict(payload: PredictRequest, user: dict = Depends(get_current_user
     features["Time"] = payload.time
     features["Amount"] = payload.amount
 
+    logger.info(f"Predict inputs: {features}")
     result = engine.predict(features, model=payload.model, threshold=payload.threshold)
+    logger.info(f"Predict outputs: {result}")
 
     await db.audit_log.insert_one({
         "actor": user["email"],
@@ -405,7 +418,20 @@ async def ml_metrics(user: dict = Depends(get_current_user)):
 async def ml_retrain(user: dict = Depends(get_current_user)):
     if user.get("role") not in ("admin", "senior_analyst"):
         raise HTTPException(403, "Only senior analysts can retrain models")
-    await train_models_async()
+    
+    # Force retrain
+    await train_models_async(force=True)
+    
+    # Re-seed transactions/cases with predictions from the new model!
+    logger.info("🧹 Models were retrained via Console. Clearing transactions/cases and re-seeding...")
+    await db.transactions.delete_many({})
+    await db.cases.delete_many({})
+    await db.rules.delete_many({})
+    
+    await seed_demo_transactions(db, engine, target=800)
+    await seed_rules(db)
+    await seed_cases(db, engine)
+
     await db.audit_log.insert_one({
         "actor": user["email"],
         "action": "retrain_models",
@@ -444,10 +470,7 @@ async def list_cases(
 
 @app.get("/api/cases/{case_id}")
 async def get_case(case_id: str, user: dict = Depends(get_current_user)):
-    try:
-        oid = ObjectId(case_id)
-    except Exception:
-        raise HTTPException(400, "Invalid case id")
+    oid = parse_oid(case_id)
     c = await db.cases.find_one({"_id": oid})
     if not c:
         raise HTTPException(404, "Case not found")
@@ -461,6 +484,18 @@ async def get_case(case_id: str, user: dict = Depends(get_current_user)):
 
 @app.post("/api/cases")
 async def create_case(payload: CaseCreate, user: dict = Depends(get_current_user)):
+    tx = await db.transactions.find_one({"tx_id": payload.tx_id})
+    merchant = tx.get("merchant") if tx else None
+    cardholder = tx.get("cardholder") if tx else None
+    avatar = tx.get("avatar") if tx else None
+
+    notes = []
+    if payload.note:
+        notes.append({
+            "author": user["email"],
+            "text": payload.note,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
     doc = {
         "case_id": payload.case_id or f"CASE-{int(datetime.now().timestamp())}",
         "tx_id": payload.tx_id,
@@ -471,7 +506,10 @@ async def create_case(payload: CaseCreate, user: dict = Depends(get_current_user
         "status": "new",
         "assignee": payload.assignee or user["email"],
         "risk_score": payload.risk_score,
-        "notes": [],
+        "notes": notes,
+        "merchant": merchant,
+        "cardholder": cardholder,
+        "avatar": avatar,
         "created_by": user["email"],
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
@@ -490,10 +528,7 @@ async def create_case(payload: CaseCreate, user: dict = Depends(get_current_user
 
 @app.patch("/api/cases/{case_id}")
 async def update_case(case_id: str, payload: CaseUpdate, user: dict = Depends(get_current_user)):
-    try:
-        oid = ObjectId(case_id)
-    except Exception:
-        raise HTTPException(400, "Invalid case id")
+    oid = parse_oid(case_id)
     update_fields = {k: v for k, v in payload.model_dump(exclude_none=True).items() if k != "note"}
     update_fields["updated_at"] = datetime.now(timezone.utc)
     update_op: dict = {"$set": update_fields}
@@ -561,10 +596,7 @@ async def create_rule(payload: RuleCreate, user: dict = Depends(get_current_user
 
 @app.patch("/api/rules/{rule_id}")
 async def update_rule(rule_id: str, payload: RuleUpdate, user: dict = Depends(get_current_user)):
-    try:
-        oid = ObjectId(rule_id)
-    except Exception:
-        raise HTTPException(400, "Invalid rule id")
+    oid = parse_oid(rule_id)
     update_fields = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
     result = await db.rules.update_one({"_id": oid}, {"$set": update_fields})
     if result.matched_count == 0:
@@ -578,10 +610,7 @@ async def update_rule(rule_id: str, payload: RuleUpdate, user: dict = Depends(ge
 
 @app.delete("/api/rules/{rule_id}")
 async def delete_rule(rule_id: str, user: dict = Depends(get_current_user)):
-    try:
-        oid = ObjectId(rule_id)
-    except Exception:
-        raise HTTPException(400, "Invalid rule id")
+    oid = parse_oid(rule_id)
     result = await db.rules.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(404, "Rule not found")
@@ -603,13 +632,11 @@ async def list_audit(
         item["id"] = str(item.pop("_id"))
         if isinstance(item.get("created_at"), datetime):
             item["created_at"] = item["created_at"].isoformat()
-        # Sanitize any remaining ObjectIds in details
+        # Sanitize any remaining datetimes in details
         if "details" in item and isinstance(item["details"], dict):
             for k, v in list(item["details"].items()):
                 if isinstance(v, datetime):
                     item["details"][k] = v.isoformat()
-                elif isinstance(v, ObjectId):
-                    item["details"][k] = str(v)
     total = await db.audit_log.count_documents({})
     return {"items": items, "total": total}
 

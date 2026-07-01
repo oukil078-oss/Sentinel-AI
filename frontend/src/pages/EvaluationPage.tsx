@@ -82,15 +82,15 @@ export function EvaluationPage() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <Panel>
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">ROC curves</p>
-            <h3 className="font-display text-xl text-white font-medium">True positive rate vs False positive rate</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">ROC curves</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">True positive rate vs False positive rate</h3>
           </div>
           <div className="h-[360px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={rocSeries}>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="fpr" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
-                <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
+                <CartesianGrid stroke="var(--th-chart-grid)" />
+                <XAxis dataKey="fpr" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
+                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
                 <Tooltip />
                 <Legend />
                 {Object.keys(MODEL_COLORS).map((m) => (
@@ -103,15 +103,15 @@ export function EvaluationPage() {
 
         <Panel>
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Precision-Recall curves</p>
-            <h3 className="font-display text-xl text-white font-medium">Better for imbalanced fraud data</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Precision-Recall curves</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Better for imbalanced fraud data</h3>
           </div>
           <div className="h-[360px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={prSeries}>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="recall" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
-                <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
+                <CartesianGrid stroke="var(--th-chart-grid)" />
+                <XAxis dataKey="recall" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
+                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
                 <Tooltip />
                 <Legend />
                 {Object.keys(MODEL_COLORS).map((m) => (
@@ -126,15 +126,15 @@ export function EvaluationPage() {
       {/* Radar comparison */}
       <Panel>
         <div className="mb-5">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Unified view</p>
-          <h3 className="font-display text-xl text-white font-medium">Performance radar across 6 metrics</h3>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Unified view</p>
+          <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Performance radar across 6 metrics</h3>
         </div>
         <div className="h-[440px]">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarData}>
-              <PolarGrid stroke="rgba(255,255,255,0.05)" />
-              <PolarAngleAxis dataKey="metric" stroke="#8A8A93" fontSize={11} />
-              <PolarRadiusAxis stroke="#5A5A63" fontSize={9} />
+              <PolarGrid stroke="var(--th-chart-grid)" />
+              <PolarAngleAxis dataKey="metric" stroke="var(--th-text-secondary)" fontSize={11} />
+              <PolarRadiusAxis stroke="var(--th-chart-axis)" fontSize={9} />
               <Tooltip />
               <Legend />
               {Object.keys(MODEL_COLORS).map((m) => (
@@ -148,15 +148,15 @@ export function EvaluationPage() {
       {/* Threshold sweep */}
       <Panel>
         <div className="mb-5">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Threshold tuning</p>
-          <h3 className="font-display text-xl text-white font-medium">Precision / Recall / F1 vs classification threshold (RF)</h3>
+          <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Threshold tuning</p>
+          <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Precision / Recall / F1 vs classification threshold (RF)</h3>
         </div>
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data?.threshold_data || []}>
-              <CartesianGrid stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="threshold" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
+              <CartesianGrid stroke="var(--th-chart-grid)" />
+              <XAxis dataKey="threshold" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="precision" stroke="#C6F24E" strokeWidth={2.5} dot={{ r: 3 }} />

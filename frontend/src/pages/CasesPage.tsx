@@ -63,7 +63,7 @@ export function CasesPage() {
       />
 
       <Panel padding="p-5">
-        <div className="flex flex-wrap items-center gap-1 p-1 bg-white/5 rounded-full w-fit">
+        <div className="flex flex-wrap items-center gap-1 p-1 bg-[var(--th-subtle)] rounded-full w-fit">
           {[
             { k: "all", label: `All (${counts.all})` },
             { k: "new", label: `New (${counts.new})` },
@@ -95,47 +95,47 @@ export function CasesPage() {
               className={`w-full text-left rounded-[20px] p-5 border transition-all ${
                 selected?.id === c.id
                   ? "bg-[#C6F24E]/[0.06] border-[#C6F24E]/30"
-                  : "bg-[#151518] border-white/5 hover:border-white/10"
+                  : "bg-[var(--th-surface)] border-[var(--th-border)] hover:border-[var(--th-border-strong)]"
               }`}
             >
               <div className="flex items-center justify-between gap-3 mb-3">
                 <StatusPill status={c.status} />
                 <StatusPill status={c.priority} />
               </div>
-              <h3 className="text-sm font-semibold text-white mb-1 line-clamp-2">{c.title}</h3>
-              <p className="text-[10px] font-mono text-[#5A5A63] tnum mb-3">{c.case_id}</p>
+              <h3 className="text-sm font-semibold text-[var(--th-text)] mb-1 line-clamp-2">{c.title}</h3>
+              <p className="text-[10px] font-mono text-[var(--th-text-dim)] tnum mb-3">{c.case_id}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#8A8A93]">{timeAgo(c.created_at)}</span>
-                <span className="font-mono text-sm text-white tnum font-light">{formatCurrency(c.amount)}</span>
+                <span className="text-xs text-[var(--th-text-secondary)]">{timeAgo(c.created_at)}</span>
+                <span className="font-mono text-sm text-[var(--th-text)] tnum font-light">{formatCurrency(c.amount)}</span>
               </div>
             </motion.button>
           ))}
           {items.length === 0 && (
-            <Panel><p className="text-center text-[#8A8A93] py-10 text-sm">No cases match this filter</p></Panel>
+            <Panel><p className="text-center text-[var(--th-text-secondary)] py-10 text-sm">No cases match this filter</p></Panel>
           )}
         </div>
 
         {/* Detail — WHITE for split-feel like home */}
         <div className="xl:col-span-3">
           {selected ? (
-            <Panel light className="!text-[#0B0B0D]">
+            <Panel light className="!text-[var(--th-invert-text)]">
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <StatusPill status={selected.status} />
                     <StatusPill status={selected.priority} />
                   </div>
-                  <h2 className="font-display text-2xl text-[#0B0B0D] font-medium mb-2 text-balance">{selected.title}</h2>
-                  <p className="text-xs font-mono text-[#5A5A63] tnum">{selected.case_id} · assigned to {selected.assignee}</p>
+                  <h2 className="font-display text-2xl text-[var(--th-invert-text)] font-medium mb-2 text-balance">{selected.title}</h2>
+                  <p className="text-xs font-mono text-[var(--th-text-dim)] tnum">{selected.case_id} · assigned to {selected.assignee}</p>
                 </div>
               </div>
 
-              <p className="text-sm text-[#5A5A63] leading-relaxed mb-6 pb-6 border-b border-black/5">
+              <p className="text-sm text-[var(--th-text-dim)] leading-relaxed mb-6 pb-6 border-b border-[var(--th-border)]">
                 {selected.description}
               </p>
 
               {/* nested DARK metric strip — like reference image */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-[#0B0B0D]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-[var(--th-bg)]">
                 {[
                   ["Amount", formatCurrency(selected.amount)],
                   ["Risk score", `${(selected.risk_score * 100).toFixed(1)}%`],
@@ -143,15 +143,15 @@ export function CasesPage() {
                   ["Created", timeAgo(selected.created_at)],
                 ].map(([k, v]) => (
                   <div key={k as string}>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A93] font-bold">{k}</p>
-                    <p className="text-sm font-mono text-white mt-1 tnum truncate">{v as any}</p>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-secondary)] font-bold">{k}</p>
+                    <p className="text-sm font-mono text-[var(--th-text)] mt-1 tnum truncate">{v as any}</p>
                   </div>
                 ))}
               </div>
 
               {/* Actions */}
               <div className="flex flex-wrap items-center gap-2 mb-6">
-                <p className="text-xs text-[#5A5A63] mr-2">Move to:</p>
+                <p className="text-xs text-[var(--th-text-dim)] mr-2">Move to:</p>
                 {STATUSES.map((s) => (
                   <button
                     key={s}
@@ -161,7 +161,7 @@ export function CasesPage() {
                       "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all",
                       selected.status === s
                         ? "bg-[#C6F24E] text-[#0B0B0D] shadow-[0_4px_20px_rgba(198,242,78,0.35)]"
-                        : "bg-black/5 text-[#5A5A63] hover:bg-[#0B0B0D] hover:text-white"
+                        : "bg-[var(--th-subtle)] text-[var(--th-text-dim)] hover:bg-[var(--th-bg)] hover:text-[var(--th-text)]"
                     )}
                   >
                     {s.replace("_", " ")}
@@ -170,19 +170,19 @@ export function CasesPage() {
               </div>
 
               {/* Notes */}
-              <div className="border-t border-black/5 pt-6">
-                <h4 className="font-semibold text-[#0B0B0D] mb-4 flex items-center gap-2">
+              <div className="border-t border-[var(--th-border)] pt-6">
+                <h4 className="font-semibold text-[var(--th-invert-text)] mb-4 flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-[#9FC63B]" strokeWidth={2} />
                   Analyst notes ({selected.notes?.length || 0})
                 </h4>
                 <div className="space-y-3 mb-4 max-h-[240px] overflow-y-auto">
                   {(selected.notes || []).map((n: any, i: number) => (
-                    <div key={i} className="p-4 rounded-2xl bg-black/[0.03] border border-black/5">
+                    <div key={i} className="p-4 rounded-2xl bg-[var(--th-subtle)] border border-[var(--th-border)]">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs font-semibold text-[#0B0B0D]">{n.author}</span>
-                        <span className="text-[10px] text-[#8A8A93]">{timeAgo(n.created_at)}</span>
+                        <span className="text-xs font-semibold text-[var(--th-invert-text)]">{n.author}</span>
+                        <span className="text-[10px] text-[var(--th-text-secondary)]">{timeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-sm text-[#5A5A63] leading-relaxed">{n.text}</p>
+                      <p className="text-sm text-[var(--th-text-dim)] leading-relaxed">{n.text}</p>
                     </div>
                   ))}
                 </div>
@@ -193,7 +193,7 @@ export function CasesPage() {
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Add an investigation note..."
                     data-testid="case-note-input"
-                    className="flex-1 bg-black/[0.03] border border-black/10 rounded-full px-5 py-2.5 text-sm text-[#0B0B0D] placeholder:text-[#8A8A93] focus:border-[#9FC63B]/50 focus:outline-none"
+                    className="flex-1 bg-[var(--th-subtle)] border border-[var(--th-border-strong)] rounded-full px-5 py-2.5 text-sm text-[var(--th-invert-text)] placeholder:text-[var(--th-text-secondary)] focus:border-[#9FC63B]/50 focus:outline-none"
                     onKeyDown={(e) => e.key === "Enter" && addNote()}
                   />
                   <Button variant="primary" onClick={addNote} testid="add-note-btn">
@@ -203,7 +203,7 @@ export function CasesPage() {
               </div>
             </Panel>
           ) : (
-            <Panel><p className="text-center text-[#8A8A93] py-16">Select a case to review</p></Panel>
+            <Panel><p className="text-center text-[var(--th-text-secondary)] py-16">Select a case to review</p></Panel>
           )}
         </div>
       </div>

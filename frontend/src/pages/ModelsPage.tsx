@@ -80,8 +80,8 @@ export function ModelsPage() {
       />
 
       {/* Pipeline visual — WHITE panel (split-feel like home) */}
-      <Panel light className="!text-[#0B0B0D]">
-        <h3 className="font-display text-lg text-[#0B0B0D] mb-5">Training pipeline</h3>
+      <Panel light className="!text-[var(--th-invert-text)]">
+        <h3 className="font-display text-lg text-[var(--th-invert-text)] mb-5">Training pipeline</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
           {[
             { step: "01", label: "Ingest", desc: "30K rows" },
@@ -94,11 +94,11 @@ export function ModelsPage() {
               key={s.step}
               initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * i }}
-              className="p-4 rounded-2xl bg-black/[0.03] border border-black/5"
+              className="p-4 rounded-2xl bg-[var(--th-subtle)] border border-[var(--th-border)]"
             >
               <p className="text-[10px] uppercase tracking-[0.2em] text-[#9FC63B] font-bold mb-2">{s.step}</p>
-              <p className="text-sm text-[#0B0B0D] font-semibold">{s.label}</p>
-              <p className="text-xs text-[#8A8A93]">{s.desc}</p>
+              <p className="text-sm text-[var(--th-invert-text)] font-semibold">{s.label}</p>
+              <p className="text-xs text-[var(--th-text-secondary)]">{s.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export function ModelsPage() {
                   <p className="text-[11px] uppercase tracking-[0.22em] text-[#C6F24E] font-bold mb-1">
                     {MODEL_META[k]?.label || k}
                   </p>
-                  <p className="text-xs text-[#8A8A93]">{MODEL_META[k]?.desc}</p>
+                  <p className="text-xs text-[var(--th-text-secondary)]">{MODEL_META[k]?.desc}</p>
                 </div>
                 <div className="w-9 h-9 rounded-full bg-[#C6F24E]/10 flex items-center justify-center text-[#C6F24E]">
                   <Cpu className="w-4 h-4" strokeWidth={2} />
@@ -130,9 +130,9 @@ export function ModelsPage() {
                   ["ROC-AUC", v.roc_auc * 100],
                   ["PR-AUC", v.pr_auc * 100],
                 ].map(([label, val]) => (
-                  <div key={label as string} className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <p className="text-[9px] uppercase tracking-[0.18em] text-[#8A8A93] font-bold">{label}</p>
-                    <p className="font-mono text-base text-white mt-1 tnum font-light">
+                  <div key={label as string} className="p-3 rounded-xl bg-[var(--th-subtle)] border border-[var(--th-border)]">
+                    <p className="text-[9px] uppercase tracking-[0.18em] text-[var(--th-text-secondary)] font-bold">{label}</p>
+                    <p className="font-mono text-base text-[var(--th-text)] mt-1 tnum font-light">
                       {(val as number).toFixed(2)}%
                     </p>
                   </div>
@@ -159,13 +159,13 @@ export function ModelsPage() {
 
       {/* Comparison bar chart */}
       <Panel>
-        <h3 className="font-display text-xl text-white font-medium mb-6">Model comparison (accuracy %)</h3>
+        <h3 className="font-display text-xl text-[var(--th-text)] font-medium mb-6">Model comparison (accuracy %)</h3>
         <div className="h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={comparison} layout="vertical" margin={{ left: 80 }}>
-              <CartesianGrid stroke="rgba(255,255,255,0.04)" horizontal={false} />
-              <XAxis type="number" domain={[80, 100]} stroke="#5A5A63" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis dataKey="model" type="category" stroke="#8A8A93" fontSize={11} tickLine={false} axisLine={false} width={80} />
+              <CartesianGrid stroke="var(--th-chart-grid)" horizontal={false} />
+              <XAxis type="number" domain={[80, 100]} stroke="var(--th-chart-axis)" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis dataKey="model" type="category" stroke="var(--th-text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={80} />
               <Tooltip />
               <Bar dataKey="accuracy" radius={[0, 10, 10, 0]}>
                 {comparison.map((c, i) => (<Cell key={i} fill={c.color} />))}
@@ -178,12 +178,12 @@ export function ModelsPage() {
       {/* Training logs */}
       {logs.length > 0 && (
         <Panel>
-          <h3 className="font-display text-lg text-white mb-4 flex items-center gap-2">
+          <h3 className="font-display text-lg text-[var(--th-text)] mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#C6F24E]" strokeWidth={2} /> Training logs
           </h3>
-          <div className="rounded-2xl bg-black/40 border border-white/5 p-5 font-mono text-xs space-y-1.5 max-h-[240px] overflow-y-auto">
+          <div className="rounded-2xl bg-[var(--th-overlay)] border border-[var(--th-border)] p-5 font-mono text-xs space-y-1.5 max-h-[240px] overflow-y-auto">
             {logs.map((l, i) => (
-              <div key={i} className={l.startsWith("✓") ? "text-[#C6F24E]" : l.startsWith("✗") ? "text-[#FF3B30]" : "text-[#8A8A93]"}>
+              <div key={i} className={l.startsWith("✓") ? "text-[#C6F24E]" : l.startsWith("✗") ? "text-[#FF3B30]" : "text-[var(--th-text-secondary)]"}>
                 {l}
               </div>
             ))}

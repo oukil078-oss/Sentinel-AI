@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 from fastapi import HTTPException, Request
-from bson import ObjectId
+
 
 
 JWT_ALGORITHM = "HS256"
@@ -70,7 +70,7 @@ async def get_current_user_dep(request: Request, db) -> dict:
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    user = await db.users.find_one({"_id": ObjectId(payload["sub"])})
+    user = await db.users.find_one({"_id": payload["sub"]})
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 

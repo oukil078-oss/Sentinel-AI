@@ -1,6 +1,6 @@
 # Deploying Sentinel AI for Free
 
-> **Stack:** Vercel (frontend) + Render (backend) + MongoDB Atlas (database) + GitHub Actions (keep-alive)
+> **Stack:** Vercel (frontend) + Render (backend) + Supabase (database) + GitHub Actions (keep-alive)
 > **Total cost:** $0/month
 > **Total time:** ~25 minutes
 
@@ -20,24 +20,24 @@ I just added these to your repo. Push them first using the **"Save to GitHub"** 
 
 ---
 
-## Step 1 — MongoDB Atlas (free database)
+## Step 1 — Supabase (free database)
 
-Render no longer offers free MongoDB, but Atlas's M0 tier is free forever (512 MB).
+Supabase offers a free PostgreSQL database tier (which is free forever).
 
-1. Go to <https://www.mongodb.com/cloud/atlas/register> → sign up.
-2. **Build a Database** → **M0 FREE** → pick any region close to you (e.g. AWS Oregon).
-3. **Database Access** (left sidebar) → **Add New Database User**:
-   - Authentication: **Password**
-   - Username: `sentinel`
-   - Password: click **Autogenerate Secure Password** → **Copy** → save it somewhere
-   - Built-in Role: **Read and write to any database**
-   - **Add User**
-4. **Network Access** → **Add IP Address** → **Allow access from anywhere** (`0.0.0.0/0`) → **Confirm**.
-5. **Database** → click **Connect** on your cluster → **Drivers** → **Python 3.6 or later** → copy the connection string. Looks like:
+1. Go to <https://supabase.com> → sign up / sign in.
+2. Click **New Project** → choose an organization.
+3. Fill in the Project details:
+   - **Name**: `sentinel-db`
+   - **Database Password**: click **Generate a password** → **Copy** → save it somewhere safe.
+   - **Region**: Pick any region close to your backend (e.g. West US / Oregon).
+4. Click **Create new project**. Wait 1-2 minutes for the database to provision.
+5. Go to **Project Settings** (gear icon in left sidebar) → **Database**.
+6. Under **Connection string**, select the **URI** tab.
+7. Copy the Connection URI. It should look like:
    ```
-   mongodb+srv://sentinel:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+   postgresql://postgres.[your-project-ref]:[your-password].pooler.supabase.com:6543/postgres
    ```
-   Replace `<password>` with the password from step 3. **Save the full string** — you'll paste it on Render.
+8. Replace `[your-password]` with the password you generated in step 3. **Save the full connection string** — you'll paste it on Render as `DATABASE_URL`.
 
 ---
 
@@ -53,11 +53,11 @@ Render no longer offers free MongoDB, but Atlas's M0 tier is free forever (512 M
 
    | Key | Value |
    |---|---|
-   | `MONGO_URL` | the full Atlas connection string from Step 1.5 |
+   | `DATABASE_URL` | the full Supabase connection string from Step 1.8 |
    | `ADMIN_PASSWORD` | `Sentinel2026!` (or anything you want — write it down) |
    | `FRONTEND_URL` | leave **blank** for now → we'll fill it in Step 4 |
 
-   `JWT_SECRET` is auto-generated. `DB_NAME`, `ADMIN_EMAIL`, `PYTHON_VERSION` are pre-filled.
+   `JWT_SECRET` is auto-generated. `ADMIN_EMAIL`, `PYTHON_VERSION` are pre-filled.
 
 6. Click **Apply** again. Render starts building.
 7. **Wait ~5 minutes.** First build is slow because:
@@ -97,8 +97,7 @@ Render no longer offers free MongoDB, but Atlas's M0 tier is free forever (512 M
 3. Add env vars under **Environment**:
    ```
    PYTHON_VERSION=3.11.9
-   MONGO_URL=<from Atlas>
-   DB_NAME=sentinel_fraud
+   DATABASE_URL=<from Supabase>
    JWT_SECRET=<generate: python3 -c "import secrets; print(secrets.token_hex(32))">
    ADMIN_EMAIL=analyst@sentinel.ai
    ADMIN_PASSWORD=Sentinel2026!
@@ -175,10 +174,10 @@ Now your backend will be pinged every 14 minutes, 24/7, for free. 🎉
 - Render free tier has 512 MB RAM, just barely enough. If it OOM's, set `PYTHON_VERSION=3.11.9` (smaller wheels than 3.12) — already in `render.yaml`.
 
 ### Render starts but `/api/health` returns 502
-- Check **Logs** tab. Most common: `MONGO_URL` typo or Atlas IP whitelist missing `0.0.0.0/0`.
+- Check **Logs** tab. Most common: `DATABASE_URL` typo or Supabase database configuration issue.
 
 ### Login returns 401
-- The admin user wasn't seeded. Check Render logs for `Seeded admin user`. If absent, MongoDB connection failed during startup — fix `MONGO_URL` and click **Manual Deploy → Clear build cache & deploy**.
+- The admin user wasn't seeded. Check Render logs for `Seeded admin user`. If absent, database connection failed during startup — fix `DATABASE_URL` and click **Manual Deploy → Clear build cache & deploy**.
 
 ### Browser console shows "CORS blocked"
 - `FRONTEND_URL` on Render doesn't match your Vercel domain exactly. Re-check the URL (no trailing slash, correct subdomain) and Render redeploys.
@@ -200,7 +199,7 @@ Now your backend will be pinged every 14 minutes, 24/7, for free. 🎉
 |---|---|---|
 | Vercel | Hobby | $0 |
 | Render Web Service | Free (512 MB, 750 hr/mo) | $0 |
-| MongoDB Atlas | M0 (512 MB, shared) | $0 |
+| Supabase | Free tier (PostgreSQL) | $0 |
 | GitHub Actions (keep-alive) | 2000 min/mo free | $0 |
 | **Total** | | **$0/month** |
 
@@ -211,8 +210,7 @@ Now your backend will be pinged every 14 minutes, 24/7, for free. 🎉
 ### Render → sentinel-ai-backend → Environment
 ```
 PYTHON_VERSION=3.11.9
-MONGO_URL=mongodb+srv://sentinel:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
-DB_NAME=sentinel_fraud
+DATABASE_URL=postgresql://postgres.xxxxxx:PASSWORD@aws-0-xxxxxx.pooler.supabase.com:6543/postgres
 JWT_SECRET=<auto-generated by render.yaml>
 ADMIN_EMAIL=analyst@sentinel.ai
 ADMIN_PASSWORD=Sentinel2026!

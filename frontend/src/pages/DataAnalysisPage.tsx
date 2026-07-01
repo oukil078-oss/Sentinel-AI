@@ -43,10 +43,10 @@ export function DataAnalysisPage() {
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${k.color}18`, color: k.color }}>
                   <k.icon className="w-4 h-4" strokeWidth={2} />
                 </div>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[#5A5A63] font-bold">V1–V28 PCA</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--th-text-dim)] font-bold">V1–V28 PCA</span>
               </div>
-              <p className="font-mono text-3xl text-white tnum font-light">{k.value}</p>
-              <p className="text-xs text-[#8A8A93] mt-1">{k.label}</p>
+              <p className="font-mono text-3xl text-[var(--th-text)] tnum font-light">{k.value}</p>
+              <p className="text-xs text-[var(--th-text-secondary)] mt-1">{k.label}</p>
             </Panel>
           </motion.div>
         ))}
@@ -56,8 +56,8 @@ export function DataAnalysisPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <Panel className="lg:col-span-2">
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Imbalance problem</p>
-            <h3 className="font-display text-xl text-white font-medium">Class distribution</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Imbalance problem</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Class distribution</h3>
           </div>
           <div className="h-[280px] relative">
             <ResponsiveContainer width="100%" height="100%">
@@ -76,16 +76,16 @@ export function DataAnalysisPage() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <p className="font-mono text-3xl text-white tnum font-light">{((fraudCount / total) * 100).toFixed(2)}%</p>
-              <p className="text-xs text-[#8A8A93] uppercase tracking-wider font-bold">Fraud rate</p>
+              <p className="font-mono text-3xl text-[var(--th-text)] tnum font-light">{((fraudCount / total) * 100).toFixed(2)}%</p>
+              <p className="text-xs text-[var(--th-text-secondary)] uppercase tracking-wider font-bold">Fraud rate</p>
             </div>
           </div>
           <div className="flex items-center justify-center gap-6 mt-2 text-xs">
             {(data?.class_distribution || []).map((c: any) => (
               <div key={c.name} className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: c.color }} />
-                <span className="text-[#8A8A93]">{c.name}</span>
-                <span className="font-mono text-white tnum font-semibold">{formatNumber(c.value)}</span>
+                <span className="text-[var(--th-text-secondary)]">{c.name}</span>
+                <span className="font-mono text-[var(--th-text)] tnum font-semibold">{formatNumber(c.value)}</span>
               </div>
             ))}
           </div>
@@ -93,15 +93,15 @@ export function DataAnalysisPage() {
 
         <Panel className="lg:col-span-3">
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Feature × Class</p>
-            <h3 className="font-display text-xl text-white font-medium">Correlation with fraud label</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Feature × Class</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Correlation with fraud label</h3>
           </div>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.correlations || []} layout="vertical" margin={{ left: 30 }}>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                <XAxis type="number" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis dataKey="feature" type="category" stroke="#8A8A93" fontSize={11} tickLine={false} axisLine={false} width={50} />
+                <CartesianGrid stroke="var(--th-chart-grid)" horizontal={false} />
+                <XAxis type="number" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis dataKey="feature" type="category" stroke="var(--th-text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={50} />
                 <Tooltip />
                 <Bar dataKey="correlation" radius={[0, 8, 8, 0]}>
                   {(data?.correlations || []).map((c: any, i: number) => (
@@ -118,15 +118,15 @@ export function DataAnalysisPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <Panel className="lg:col-span-3">
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Random Forest</p>
-            <h3 className="font-display text-xl text-white font-medium">Feature importance (top 15)</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Random Forest</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Feature importance (top 15)</h3>
           </div>
           <div className="h-[380px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.feature_importance || []} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" horizontal={false} />
-                <XAxis type="number" stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis dataKey="feature" type="category" stroke="#8A8A93" fontSize={11} tickLine={false} axisLine={false} width={60} />
+                <CartesianGrid stroke="var(--th-chart-grid)" horizontal={false} />
+                <XAxis type="number" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis dataKey="feature" type="category" stroke="var(--th-text-secondary)" fontSize={11} tickLine={false} axisLine={false} width={60} />
                 <Tooltip />
                 <Bar dataKey="importance" fill="#C6F24E" radius={[0, 8, 8, 0]} />
               </BarChart>
@@ -136,15 +136,15 @@ export function DataAnalysisPage() {
 
         <Panel className="lg:col-span-2">
           <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#8A8A93] font-bold mb-1">Right-skewed</p>
-            <h3 className="font-display text-xl text-white font-medium">Amount distribution</h3>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Right-skewed</p>
+            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Amount distribution</h3>
           </div>
           <div className="h-[380px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.amount_distribution || []}>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-                <XAxis dataKey="range" stroke="#8A8A93" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#5A5A63" fontSize={10} tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="var(--th-chart-grid)" vertical={false} />
+                <XAxis dataKey="range" stroke="var(--th-text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip />
                 <Bar dataKey="count" fill="#5AC8FA" radius={[8, 8, 0, 0]} />
               </BarChart>
