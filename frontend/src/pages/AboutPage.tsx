@@ -56,7 +56,7 @@ export function AboutPage() {
             <h3 className="font-display text-xl text-[var(--th-invert-text)] font-medium mb-1 flex items-center gap-2">
               <Users className="w-5 h-5 text-[#9FC63B]" strokeWidth={2} /> Project team
             </h3>
-            <p className="text-sm text-[var(--th-text-dim)]">Built by three students for The Machine Learning module.</p>
+            <p className="text-sm text-[#5A5A63]">Built by three students for The Machine Learning module.</p>
           </div>
           <img 
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQP6a0Axz2eWu-2MLRCRonTtFwCjPIOayZOFg&s" 
