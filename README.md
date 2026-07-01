@@ -67,8 +67,3 @@ Four models from the reference repository:
 >
 > *This demonstrates the complete data science lifecycle: from data exploration and preprocessing through model training, rigorous evaluation, and interactive deployment."*
 
-## 📎 Reference
-
-- **Source Repository:** https://github.com/shakiliitju/Credit-Card-Fraud-Detection-Using-Machine-Learning
-- **Original Dataset:** https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
-- **Authors:** shakiliitju (Jahangirnagar University)
