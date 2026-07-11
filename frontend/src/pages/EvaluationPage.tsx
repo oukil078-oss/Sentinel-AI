@@ -1,171 +1,167 @@
-import { useEffect, useState } from "react";
-import {
-  ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
-} from "recharts";
-import { api, formatApiError } from "../lib/api";
-import { PageHeader, Panel } from "../components/ui";
-import { useToast } from "../components/Toast";
+aW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VTdGF0ZSB9IGZyb20gInJlYWN0IjsK
+aW1wb3J0IHsKICBSZXNwb25zaXZlQ29udGFpbmVyLCBMaW5lQ2hhcnQsIExp
+bmUsIEFyZWFDaGFydCwgQXJlYSwgWEF4aXMsIFlBeGlzLCBDYXJ0ZXNpYW5H
+cmlkLCBUb29sdGlwLAogIFJhZGFyQ2hhcnQsIFBvbGFyR3JpZCwgUG9sYXJB
+bmdsZUF4aXMsIFBvbGFyUmFkaXVzQXhpcywgUmFkYXIsIExlZ2VuZCwKfSBm
+cm9tICJyZWNoYXJ0cyI7CmltcG9ydCB7IGFwaSwgZm9ybWF0QXBpRXJyb3Ig
+fSBmcm9tICIuLi9saWIvYXBpIjsKaW1wb3J0IHsgUGFnZUhlYWRlciwgUGFu
+ZWwgfSBmcm9tICIuLi9jb21wb25lbnRzL3VpIjsKaW1wb3J0IHsgdXNlVG9h
+c3QgfSBmcm9tICIuLi9jb21wb25lbnRzL1RvYXN0IjsKCmNvbnN0IE1PREVM
+X0NPTE9SUzogUmVjb3JkPHN0cmluZywgc3RyaW5nPiA9IHsKICByYW5kb21f
+Zm9yZXN0OiAiI0M2RjI0RSIsCiAga25uOiAiIzVBQzhGQSIsCiAgbG9naXN0
+aWNfcmVncmVzc2lvbjogIiNGRkI4MDAiLAogIGRlY2lzaW9uX3RyZWU6ICIj
+RkY4QTAwIiwKICBzdm06ICIjOUQ3RkZGIiwKfTsKCmNvbnN0IE1PREVMX05B
+TUVTOiBSZWNvcmQ8c3RyaW5nLCBzdHJpbmc+ID0gewogIHJhbmRvbV9mb3Jl
+c3Q6ICJSYW5kb20gRm9yZXN0IiwKICBrbm46ICJLTk4iLAogIGxvZ2lzdGlj
+X3JlZ3Jlc3Npb246ICJMb2dpc3RpYyBSZWcuIiwKICBkZWNpc2lvbl90cmVl
+OiAiRGVjaXNpb24gVHJlZSIsCiAgc3ZtOiAiU1ZNIiwKfTsKCmV4cG9ydCBm
+dW5jdGlvbiBFdmFsdWF0aW9uUGFnZSgpIHsKICBjb25zdCB7IHRvYXN0IH0g
+PSB1c2VUb2FzdCgpOwogIGNvbnN0IFtkYXRhLCBzZXREYXRhXSA9IHVzZVN0
+YXRlPGFueT4obnVsbCk7CgogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBhcGku
+Z2V0KCIvYXBpL21sL21ldHJpY3MiKQogICAgICAudGhlbigocikgPT4gc2V0
+RGF0YShyLmRhdGEpKQogICAgICAuY2F0Y2goKGVycikgPT4gdG9hc3QoZm9y
+bWF0QXBpRXJyb3IoZXJyKSwgImVycm9yIikpOwogIH0sIFtdKTsKCiAgLy8g
+QnVpbGQgdW5pZmllZCBST0MgZGF0YQogIGNvbnN0IHJvY1NlcmllczogYW55
+W10gPSBbXTsKICBpZiAoZGF0YT8ucm9jX2N1cnZlcykgewogICAgT2JqZWN0
+LmVudHJpZXMoZGF0YS5yb2NfY3VydmVzKS5mb3JFYWNoKChbbW9kZWwsIHB0
+c106IGFueSkgPT4gewogICAgICBwdHMuZm9yRWFjaCgocDogYW55KSA9PiB7
+CiAgICAgICAgY29uc3QgZXhpc3RpbmcgPSByb2NTZXJpZXMuZmluZCgocykg
+PT4gcy5mcHIgPT09IHAuZnByKTsKICAgICAgICBpZiAoZXhpc3RpbmcpIGV4
+aXN0aW5nW21vZGVsXSA9IHAudHByOwogICAgICAgIGVsc2Ugcm9jU2VyaWVz
+LnB1c2goeyBmcHI6IHAuZnByLCBbbW9kZWxdOiBwLnRwciB9KTsKICAgICAg
+fSk7CiAgICB9KTsKICAgIHJvY1Nlcmllcy5zb3J0KChhLCBiKSA9PiBhLmZw
+ciAtIGIuZnByKTsKICB9CgogIC8vIFBSIEN1cnZlcwogIGNvbnN0IHByU2Vy
+aWVzOiBhbnlbXSA9IFtdOwogIGlmIChkYXRhPy5wcl9jdXJ2ZXMpIHsKICAg
+IE9iamVjdC5lbnRyaWVzKGRhdGEucHJfY3VydmVzKS5mb3JFYWNoKChbbW9k
+ZWwsIHB0c106IGFueSkgPT4gewogICAgICBwdHMuZm9yRWFjaCgocDogYW55
+KSA9PiB7CiAgICAgICAgY29uc3QgZXhpc3RpbmcgPSBwclNlcmllcy5maW5k
+KChzKSA9PiBzLnJlY2FsbCA9PT0gcC5yZWNhbGwpOwogICAgICAgIGlmIChl
+eGlzdGluZykgZXhpc3RpbmdbbW9kZWxdID0gcC5wcmVjaXNpb247CiAgICAg
+ICAgZWxzZSBwclNlcmllcy5wdXNoKHsgcmVjYWxsOiBwLnJlY2FsbCwgW21v
+ZGVsXTogcC5wcmVjaXNpb24gfSk7CiAgICAgIH0pOwogICAgfSk7CiAgICBw
+clNlcmllcy5zb3J0KChhLCBiKSA9PiBhLnJlY2FsbCAtIGIucmVjYWxsKTsK
+ICB9CgogIC8vIFJhZGFyIGRhdGEKICBjb25zdCByYWRhckRhdGEgPSBkYXRh
+Py5tZXRyaWNzID8gWwogICAgImFjY3VyYWN5IiwgInByZWNpc2lvbiIsICJy
+ZWNhbGwiLCAiZjEiLCAicm9jX2F1YyIsICJwcl9hdWMiLAogIF0ubWFwKCht
+ZXRyaWMpID0+IHsKICAgIGNvbnN0IHJvdzogYW55ID0geyBtZXRyaWM6IG1l
+dHJpYy5yZXBsYWNlKCJfIiwgIi0iKS50b1VwcGVyQ2FzZSgpIH07CiAgICBP
+YmplY3QuZW50cmllcyhkYXRhLm1ldHJpY3MpLmZvckVhY2goKFtrLCB2XTog
+YW55KSA9PiB7CiAgICAgIHJvd1trXSA9IHZbbWV0cmljXSAqIDEwMDsKICAg
+IH0pOwogICAgcmV0dXJuIHJvdzsKICB9KSA6IFtdOwoKICByZXR1cm4gKAog
+ICAgPGRpdiBjbGFzc05hbWU9InNwYWNlLXktNiI+CiAgICAgIDxQYWdlSGVh
+ZGVyCiAgICAgICAgZXllYnJvdz0iTW9kZWwgZXZhbHVhdGlvbiIKICAgICAg
+ICB0aXRsZT0iU2lkZS1ieS1zaWRlIGNvbXBhcmlzb24iCiAgICAgICAgc3Vi
+dGl0bGU9IlJPQyBjdXJ2ZXMsIHByZWNpc2lvbi1yZWNhbGwsIHRocmVzaG9s
+ZCBzd2VlcCwgYW5kIHJhZGFyIOKAlCB0aGUgdHJ1dGggYWJvdXQgd2hpY2gg
+bW9kZWwgd2lucywgb24gYWN0dWFsIGhvbGQtb3V0IGRhdGEuIgogICAgICAv
+PgoKICAgICAgey8qIFJPQyArIFBSICovfQogICAgICA8ZGl2IGNsYXNzTmFt
+ZT0iZ3JpZCBncmlkLWNvbHMtMSB4bDpncmlkLWNvbHMtMiBnYXAtNSI+CiAg
+ICAgICAgPFBhbmVsPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9Im1iLTUi
+PgogICAgICAgICAgICA8cCBjbGFzc05hbWU9InRleHQtWzExcHhdIHVwcGVy
+Y2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LVt2YXIoLS10aC10ZXh0LXNl
+Y29uZGFyeSldIGZvbnQtYm9sZCBtYi0xIj5ST0MgY3VydmVzPC9wPgogICAg
+ICAgICAgICA8aDMgY2xhc3NOYW1lPSJmb250LWRpc3BsYXkgdGV4dC14bCB0
+ZXh0LVt2YXIoLS10aC10ZXh0KV0gZm9udC1tZWRpdW0iPlRydWUgcG9zaXRp
+dmUgcmF0ZSB2cyBGYWxzZSBwb3NpdGl2ZSByYXRlPC9oMz4KICAgICAgICAg
+IDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9ImgtWzM2MHB4XSI+
+CiAgICAgICAgICAgIDxSZXNwb25zaXZlQ29udGFpbmVyIHdpZHRoPSIxMDAl
+IiBoZWlnaHQ9IjEwMCUiPgogICAgICAgICAgICAgIDxMaW5lQ2hhcnQgZGF0
+YT17cm9jU2VyaWVzfT4KICAgICAgICAgICAgICAgIDxDYXJ0ZXNpYW5Hcmlk
+IHN0cm9rZT0idmFyKC0tdGgtY2hhcnQtZ3JpZCkiIC8+CiAgICAgICAgICAg
+ICAgICA8WEF4aXMgZGF0YUtleT0iZnByIiBzdHJva2U9InZhcigtLXRoLWNo
+YXJ0LWF4aXMpIiBmb250U2l6ZT17MTB9IHRpY2tMaW5lPXtmYWxzZX0gYXhp
+c0xpbmU9e2ZhbHNlfSBkb21haW49e1swLCAxXX0gdHlwZT0ibnVtYmVyIiAv
+PgogICAgICAgICAgICAgICAgPFlBeGlzIHN0cm9rZT0idmFyKC0tdGgtY2hh
+cnQtYXhpcykiIGZvbnRTaXplPXsxMH0gdGlja0xpbmU9e2ZhbHNlfSBheGlz
+TGluZT17ZmFsc2V9IGRvbWFpbj17WzAsIDFdfSAvPgogICAgICAgICAgICAg
+ICAgPFRvb2x0aXAgLz4KICAgICAgICAgICAgICAgIDxMZWdlbmQgLz4KICAg
+ICAgICAgICAgICAgIHtPYmplY3Qua2V5cyhNT0RFTF9DT0xPUlMpLm1hcCgo
+bSkgPT4gKAogICAgICAgICAgICAgICAgICA8TGluZSBrZXk9e219IHR5cGU9
+Im1vbm90b25lIiBkYXRhS2V5PXttfSBzdHJva2U9e01PREVMX0NPTE9SU1tt
+XX0gc3Ryb2tlV2lkdGg9ezJ9IGRvdD17ZmFsc2V9IG5hbWU9e01PREVMX05B
+TUVTW21dfSBjb25uZWN0TnVsbHMgLz4KICAgICAgICAgICAgICAgICkpfQog
+ICAgICAgICAgICAgIDwvTGluZUNoYXJ0PgogICAgICAgICAgICA8L1Jlc3Bv
+bnNpdmVDb250YWluZXI+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L1Bh
+bmVsPgoKICAgICAgICA8UGFuZWw+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFt
+ZT0ibWItNSI+CiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT0idGV4dC1bMTFw
+eF0gdXBwZXJjYXNlIHRyYWNraW5nLVswLjI0ZW1dIHRleHQtW3ZhcigtLXRo
+LXRleHQtc2Vjb25kYXJ5KV0gZm9udC1ib2xkIG1iLTEiPlByZWNpc2lvbi1S
+ZWNhbGwgY3VydmVzPC9wPgogICAgICAgICAgICA8aDMgY2xhc3NOYW1lPSJm
+b250LWRpc3BsYXkgdGV4dC14bCB0ZXh0LVt2YXIoLS10aC10ZXh0KV0gZm9u
+dC1tZWRpdW0iPkJldHRlciBmb3IgaW1iYWxhbmNlZCBmcmF1ZCBkYXRhPC9o
+Mz4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9
+ImgtWzM2MHB4XSI+CiAgICAgICAgICAgIDxSZXNwb25zaXZlQ29udGFpbmVy
+IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogICAgICAgICAgICAgIDxM
+aW5lQ2hhcnQgZGF0YT17cHJTZXJpZXN9PgogICAgICAgICAgICAgICAgPENh
+cnRlc2lhbkdyaWQgc3Ryb2tlPSJ2YXIoLS10aC1jaGFydC1ncmlkKSIgLz4K
+ICAgICAgICAgICAgICAgIDxYQXhpcyBkYXRhS2V5PSJyZWNhbGwiIHN0cm9r
+ZT0idmFyKC0tdGgtY2hhcnQtYXhpcykiIGZvbnRTaXplPXsxMH0gdGlja0xp
+bmU9e2ZhbHNlfSBheGlzTGluZT17ZmFsc2V9IGRvbWFpbj17WzAsIDFdfSB0
+eXBlPSJudW1iZXIiIC8+CiAgICAgICAgICAgICAgICA8WUF4aXMgc3Ryb2tl
+PSJ2YXIoLS10aC1jaGFydC1heGlzKSIgZm9udFNpemU9ezEwfSB0aWNrTGlu
+ZT17ZmFsc2V9IGF4aXNMaW5lPXtmYWxzZX0gZG9tYWluPXtbMCwgMV19IC8+
+CiAgICAgICAgICAgICAgICA8VG9vbHRpcCAvPgogICAgICAgICAgICAgICAg
+PExlZ2VuZCAvPgogICAgICAgICAgICAgICAge09iamVjdC5rZXlzKE1PREVM
+X0NPTE9SUykubWFwKChtKSA9PiAoCiAgICAgICAgICAgICAgICAgIDxMaW5l
+IGtleT17bX0gdHlwZT0ibW9ub3RvbmUiIGRhdGFLZXk9e219IHN0cm9rZT17
+TU9ERUxfQ09MT1JTW21dfSBzdHJva2VXaWR0aD17Mn0gZG90PXtmYWxzZX0g
+bmFtZT17TU9ERUxfTkFNRVNbbV19IGNvbm5lY3ROdWxscyAvPgogICAgICAg
+ICAgICAgICAgKSl9CiAgICAgICAgICAgICAgPC9MaW5lQ2hhcnQ+CiAgICAg
+ICAgICAgIDwvUmVzcG9uc2l2ZUNvbnRhaW5lcj4KICAgICAgICAgIDwvZGl2
+PgogICAgICAgIDwvUGFuZWw+CiAgICAgIDwvZGl2PgoKICAgICAgey8qIFJh
+ZGFyIGNvbXBhcmlzb24gKi99CiAgICAgIDxQYW5lbD4KICAgICAgICA8ZGl2
+IGNsYXNzTmFtZT0ibWItNSI+CiAgICAgICAgICA8cCBjbGFzc05hbWU9InRl
+eHQtWzExcHhdIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LVt2
+YXIoLS10aC10ZXh0LXNlY29uZGFyeSldIGZvbnQtYm9sZCBtYi0xIj5Vbmlm
+aWVkIHZpZXc8L3A+CiAgICAgICAgICA8aDMgY2xhc3NOYW1lPSJmb250LWRp
+c3BsYXkgdGV4dC14bCB0ZXh0LVt2YXIoLS10aC10ZXh0KV0gZm9udC1tZWRp
+dW0iPlBlcmZvcm1hbmNlIHJhZGFyIGFjcm9zcyA2IG1ldHJpY3M8L2gzPgog
+ICAgICAgIDwvZGl2PgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJoLVs0NDBw
+eF0iPgogICAgICAgICAgPFJlc3BvbnNpdmVDb250YWluZXIgd2lkdGg9IjEw
+MCUiIGhlaWdodD0iMTAwJSI+CiAgICAgICAgICAgIDxSYWRhckNoYXJ0IGRh
+dGE9e3JhZGFyRGF0YX0+CiAgICAgICAgICAgICAgPFBvbGFyR3JpZCBzdHJv
+a2U9InZhcigtLXRoLWNoYXJ0LWdyaWQpIiAvPgogICAgICAgICAgICAgIDxQ
+b2xhckFuZ2xlQXhpcyBkYXRhS2V5PSJtZXRyaWMiIHN0cm9rZT0idmFyKC0t
+dGgtdGV4dC1zZWNvbmRhcnkpIiBmb250U2l6ZT17MTF9IC8+CiAgICAgICAg
+ICAgICAgPFBvbGFyUmFkaXVzQXhpcyBzdHJva2U9InZhcigtLXRoLWNoYXJ0
+LWF4aXMpIiBmb250U2l6ZT17OX0gLz4KICAgICAgICAgICAgICA8VG9vbHRp
+cCAvPgogICAgICAgICAgICAgIDxMZWdlbmQgLz4KICAgICAgICAgICAgICB7
+T2JqZWN0LmtleXMoTU9ERUxfQ09MT1JTKS5tYXAoKG0pID0+ICgKICAgICAg
+ICAgICAgICAgIDxSYWRhciBrZXk9e219IG5hbWU9e01PREVMX05BTUVTW21d
+fSBkYXRhS2V5PXttfSBzdHJva2U9e01PREVMX0NPTE9SU1ttXX0gZmlsbD17
+TU9ERUxfQ09MT1JTW21dfSBmaWxsT3BhY2l0eT17MC4xMn0gc3Ryb2tlV2lk
+dGg9ezJ9IC8+CiAgICAgICAgICAgICAgKSl9CiAgICAgICAgICAgIDwvUmFk
+YXJDaGFydD4KICAgICAgICAgIDwvUmVzcG9uc2l2ZUNvbnRhaW5lcj4KICAg
+ICAgICA8L2Rpdj4KICAgICAgPC9QYW5lbD4KCiAgICAgIHsvKiBUaHJlc2hv
+bGQgc3dlZXAgKi99CiAgICAgIDxQYW5lbD4KICAgICAgICA8ZGl2IGNsYXNz
+TmFtZT0ibWItNSI+CiAgICAgICAgICA8cCBjbGFzc05hbWU9InRleHQtWzEx
+cHhdIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LVt2YXIoLS10
+aC10ZXh0LXNlY29uZGFyeSldIGZvbnQtYm9sZCBtYi0xIj5UaHJlc2hvbGQg
+dHVuaW5nPC9wPgogICAgICAgICAgPGgzIGNsYXNzTmFtZT0iZm9udC1kaXNw
+bGF5IHRleHQteGwgdGV4dC1bdmFyKC0tdGgtdGV4dCldIGZvbnQtbWVkaXVt
+Ij5QcmVjaXNpb24gLyBSZWNhbGwgLyBGMSB2cyBjbGFzc2lmaWNhdGlvbiB0
+aHJlc2hvbGQgKFJGKTwvaDM+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRp
+diBjbGFzc05hbWU9ImgtWzMyMHB4XSI+CiAgICAgICAgICA8UmVzcG9uc2l2
+ZUNvbnRhaW5lciB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj4KICAgICAg
+ICAgICAgPExpbmVDaGFydCBkYXRhPXtkYXRhPy50aHJlc2hvbGRfZGF0YSB8
+fCBbXX0+CiAgICAgICAgICAgICAgPENhcnRlc2lhbkdyaWQgc3Ryb2tlPSJ2
+YXIoLS10aC1jaGFydC1ncmlkKSIgLz4KICAgICAgICAgICAgICA8WEF4aXMg
+ZGF0YUtleT0idGhyZXNob2xkIiBzdHJva2U9InZhcigtLXRoLWNoYXJ0LWF4
+aXMpIiBmb250U2l6ZT17MTB9IHRpY2tMaW5lPXtmYWxzZX0gYXhpc0xpbmU9
+e2ZhbHNlfSAvPgogICAgICAgICAgICAgIDxZQXhpcyBzdHJva2U9InZhcigt
+LXRoLWNoYXJ0LWF4aXMpIiBmb250U2l6ZT17MTB9IHRpY2tMaW5lPXtmYWxz
+ZX0gYXhpc0xpbmU9e2ZhbHNlfSBkb21haW49e1swLCAxXX0gLz4KICAgICAg
+ICAgICAgICA8VG9vbHRpcCAvPgogICAgICAgICAgICAgIDxMZWdlbmQgLz4K
+ICAgICAgICAgICAgICA8TGluZSB0eXBlPSJtb25vdG9uZSIgZGF0YUtleT0i
+cHJlY2lzaW9uIiBzdHJva2U9IiNDNkYyNEUiIHN0cm9rZVdpZHRoPXsyLjV9
+IGRvdD17eyByOiAzIH19IC8+CiAgICAgICAgICAgICAgPExpbmUgdHlwZT0i
+bW9ub3RvbmUiIGRhdGFLZXk9InJlY2FsbCIgc3Ryb2tlPSIjNUFDOEZBIiBz
+dHJva2VXaWR0aD17Mi41fSBkb3Q9e3sgcjogMyB9fSAvPgogICAgICAgICAg
+ICAgIDxMaW5lIHR5cGU9Im1vbm90b25lIiBkYXRhS2V5PSJmMSIgc3Ryb2tl
+PSIjRkZCODAwIiBzdHJva2VXaWR0aD17Mi41fSBkb3Q9e3sgcjogMyB9fSAv
+PgogICAgICAgICAgICA8L0xpbmVDaGFydD4KICAgICAgICAgIDwvUmVzcG9u
+c2l2ZUNvbnRhaW5lcj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9QYW5lbD4K
+ICAgIDwvZGl2PgogICk7Cn0K
 
-const MODEL_COLORS: Record<string, string> = {
-  random_forest: "#C6F24E",
-  knn: "#5AC8FA",
-  logistic_regression: "#FFB800",
-  decision_tree: "#FF8A00",
-  svm: "#9D7FFF",
-};
 
-const MODEL_NAMES: Record<string, string> = {
-  random_forest: "Random Forest",
-  knn: "KNN",
-  logistic_regression: "Logistic Reg.",
-  decision_tree: "Decision Tree",
-  svm: "SVM",
-};
-
-export function EvaluationPage() {
-  const { toast } = useToast();
-  const [data, setData] = useState<any>(null);
-
-  useEffect(() => {
-    api.get("/api/ml/metrics")
-      .then((r) => setData(r.data))
-      .catch((err) => toast(formatApiError(err), "error"));
-  }, []);
-
-  // Build unified ROC data
-  const rocSeries: any[] = [];
-  if (data?.roc_curves) {
-    Object.entries(data.roc_curves).forEach(([model, pts]: any) => {
-      pts.forEach((p: any) => {
-        const existing = rocSeries.find((s) => s.fpr === p.fpr);
-        if (existing) existing[model] = p.tpr;
-        else rocSeries.push({ fpr: p.fpr, [model]: p.tpr });
-      });
-    });
-    rocSeries.sort((a, b) => a.fpr - b.fpr);
-  }
-
-  // PR Curves
-  const prSeries: any[] = [];
-  if (data?.pr_curves) {
-    Object.entries(data.pr_curves).forEach(([model, pts]: any) => {
-      pts.forEach((p: any) => {
-        const existing = prSeries.find((s) => s.recall === p.recall);
-        if (existing) existing[model] = p.precision;
-        else prSeries.push({ recall: p.recall, [model]: p.precision });
-      });
-    });
-    prSeries.sort((a, b) => a.recall - b.recall);
-  }
-
-  // Radar data
-  const radarData = data?.metrics ? [
-    "accuracy", "precision", "recall", "f1", "roc_auc", "pr_auc",
-  ].map((metric) => {
-    const row: any = { metric: metric.replace("_", "-").toUpperCase() };
-    Object.entries(data.metrics).forEach(([k, v]: any) => {
-      row[k] = v[metric] * 100;
-    });
-    return row;
-  }) : [];
-
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Model evaluation"
-        title="Side-by-side comparison"
-        subtitle="ROC curves, precision-recall, threshold sweep, and radar — the truth about which model wins, on actual hold-out data."
-      />
-
-      {/* ROC + PR */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <Panel>
-          <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">ROC curves</p>
-            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">True positive rate vs False positive rate</h3>
-          </div>
-          <div className="h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={rocSeries}>
-                <CartesianGrid stroke="var(--th-chart-grid)" />
-                <XAxis dataKey="fpr" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
-                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
-                <Tooltip />
-                <Legend />
-                {Object.keys(MODEL_COLORS).map((m) => (
-                  <Line key={m} type="monotone" dataKey={m} stroke={MODEL_COLORS[m]} strokeWidth={2} dot={false} name={MODEL_NAMES[m]} connectNulls />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
-
-        <Panel>
-          <div className="mb-5">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Precision-Recall curves</p>
-            <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Better for imbalanced fraud data</h3>
-          </div>
-          <div className="h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={prSeries}>
-                <CartesianGrid stroke="var(--th-chart-grid)" />
-                <XAxis dataKey="recall" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} type="number" />
-                <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
-                <Tooltip />
-                <Legend />
-                {Object.keys(MODEL_COLORS).map((m) => (
-                  <Line key={m} type="monotone" dataKey={m} stroke={MODEL_COLORS[m]} strokeWidth={2} dot={false} name={MODEL_NAMES[m]} connectNulls />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
-      </div>
-
-      {/* Radar comparison */}
-      <Panel>
-        <div className="mb-5">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Unified view</p>
-          <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Performance radar across 6 metrics</h3>
-        </div>
-        <div className="h-[440px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="var(--th-chart-grid)" />
-              <PolarAngleAxis dataKey="metric" stroke="var(--th-text-secondary)" fontSize={11} />
-              <PolarRadiusAxis stroke="var(--th-chart-axis)" fontSize={9} />
-              <Tooltip />
-              <Legend />
-              {Object.keys(MODEL_COLORS).map((m) => (
-                <Radar key={m} name={MODEL_NAMES[m]} dataKey={m} stroke={MODEL_COLORS[m]} fill={MODEL_COLORS[m]} fillOpacity={0.12} strokeWidth={2} />
-              ))}
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      </Panel>
-
-      {/* Threshold sweep */}
-      <Panel>
-        <div className="mb-5">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--th-text-secondary)] font-bold mb-1">Threshold tuning</p>
-          <h3 className="font-display text-xl text-[var(--th-text)] font-medium">Precision / Recall / F1 vs classification threshold (RF)</h3>
-        </div>
-        <div className="h-[320px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data?.threshold_data || []}>
-              <CartesianGrid stroke="var(--th-chart-grid)" />
-              <XAxis dataKey="threshold" stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--th-chart-axis)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 1]} />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="precision" stroke="#C6F24E" strokeWidth={2.5} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="recall" stroke="#5AC8FA" strokeWidth={2.5} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="f1" stroke="#FFB800" strokeWidth={2.5} dot={{ r: 3 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Panel>
-    </div>
-  );
-}
+ 
